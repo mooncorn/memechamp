@@ -10,6 +10,10 @@ use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\NoConfigurationException;
 
+/**
+ * @var RouteCollection $routes;
+ */
+
 class Router
 {
     public function __invoke(RouteCollection $routes)

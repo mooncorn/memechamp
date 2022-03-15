@@ -11,10 +11,14 @@ class PageController
 {
 	public function homepage(RouteCollection $routes, RequestContext $context)
 	{
-    // $generator = new UrlGenerator($routes, $context);
-    // echo $generator->generate('profile', ['id' => '4']);
-    // header('Location: ' . $routes->get('profile')->getPath());        
+        // $generator = new UrlGenerator($routes, $context);
+        // header('Location: ' . $generator->generate('profile', ['id' => '4']));
 
-    require_once APP_ROOT . '/views/Feed.php';
+        require_once APP_ROOT . '/views/Feed.php';
 	}
+
+    public function signup(RouteCollection $routes, RequestContext $context)
+    {
+        require_once APP_ROOT . '/views/Signup.php';
+    }
 }

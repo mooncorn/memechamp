@@ -1,6 +1,6 @@
 {
-  "name": "gmaccario/simple-mvc-php-framework",
-  "description": "Simple MVC PHP framework: a demonstration of how to create a simple MVC framework in PHP",
+  "name": "mooncorn/memechamp",
+  "description": "MemeChamp: Compete for the best meme of the week.",
   "autoload": {
       "psr-4": {
           "App\\": "app/"
