@@ -14,7 +14,8 @@ class User {
     protected string $pfp;
     protected int $current_poggers;
     protected int $max_poggers;
-    protected bool $isBanned;
+    protected bool $is_banned;
+    protected bool $is_admin;
     protected string $created_at;
 
     public function __construct(mysqli $db)
@@ -27,17 +28,16 @@ class User {
         $this->pfp = "";
         $this->current_poggers = 0;
         $this->max_poggers = 0;
-        $this->isBanned = false;
+        $this->is_banned = false;
+        $this->is_admin = false;
         $this->created_at = "";
     }
 
     public function load(string $uniqueIdentifierName, int|string $value): bool {
-        if (strtolower($uniqueIdentifierName) == 'id') {
-            $sql = "SELECT * FROM user WHERE id=$value";
-        } else if (strtolower($uniqueIdentifierName) == 'username') {
-            $sql = "SELECT * FROM user WHERE username='$value'";
-        } else if (strtolower($uniqueIdentifierName) == 'email') {
-            $sql = "SELECT * FROM user WHERE email='$value'";
+        $identifier = strtolower($uniqueIdentifierName);
+
+        if ($identifier == 'id' || $identifier == 'username' || $identifier == 'email') {
+            $sql = "SELECT * FROM user WHERE $identifier='$value'";
         } else {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
@@ -53,7 +53,8 @@ class User {
           $this->setPfp($row["pfp"]);
           $this->setCurrentPoggers($row["current_poggers"]);
           $this->setMaxPoggers($row["max_poggers"]);
-          $this->setIsBanned($row["isBanned"]);
+          $this->setIsBanned($row["is_banned"]);
+          $this->setIsAdmin($row["is_admin"]);
           $this->setCreatedAt($row["created_at"]);
 
           return true;
@@ -65,7 +66,7 @@ class User {
     public function save() {
         // if user already has an id, update existing user
         if ($this->isLoaded()) {
-            $sql = "UPDATE user SET username='$this->username', email='$this->email', password='$this->password', pfp='$this->pfp', current_poggers='$this->current_poggers', max_poggers='$this->max_poggers', isBanned='$this->isBanned' WHERE id=$this->id";
+            $sql = "UPDATE user SET username='$this->username', email='$this->email', password='$this->password', pfp='$this->pfp', current_poggers='$this->current_poggers', max_poggers='$this->max_poggers', is_banned='$this->is_banned', is_admin='$this->is_admin' WHERE id=$this->id";
         }
         // if user does not have an id, insert new user
         else {
@@ -77,12 +78,10 @@ class User {
     }
 
     public static function exists(mysqli $db, string $uniqueIdentifierName, int|string $value): bool {
-        if (strtolower($uniqueIdentifierName) == 'id') {
-            $sql = "SELECT id FROM user WHERE id=$value";
-        } else if (strtolower($uniqueIdentifierName) == 'username') {
-            $sql = "SELECT id FROM user WHERE username='$value'";
-        } else if (strtolower($uniqueIdentifierName) == 'email') {
-            $sql = "SELECT id FROM user WHERE email='$value'";
+        $identifier = strtolower($uniqueIdentifierName);
+
+        if ($identifier == 'id' || $identifier == 'username' || $identifier == 'email') {
+            $sql = "SELECT * FROM user WHERE $identifier='$value'";
         } else {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
@@ -223,15 +222,31 @@ class User {
      */
     public function isBanned(): bool
     {
-        return $this->isBanned;
+        return $this->is_banned;
     }
 
     /**
-     * @param bool $isBanned
+     * @param bool $is_admin
      */
-    public function setIsBanned(bool $isBanned): void
+    public function setIsAdmin(bool $is_admin): void
     {
-        $this->isBanned = $isBanned;
+        $this->is_admin = $is_admin;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsAdmin(): bool
+    {
+        return $this->is_admin;
+    }
+
+    /**
+     * @param bool $is_banned
+     */
+    public function setIsBanned(bool $is_banned): void
+    {
+        $this->is_banned = $is_banned;
     }
 
     /**
