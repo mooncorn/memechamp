@@ -6,14 +6,6 @@ use Symfony\Component\Routing\RouteCollection;
 // Routes system
 $routes = new RouteCollection();
 
-$routes->add('user', new Route(
-    constant('URL_SUBFOLDER') . '/users/{id}', array('controller' => 'UserController', 'method'=>'profile'), array('id' => '[0-9]+')
-));
-
-$routes->add('profile', new Route(
-    constant('URL_SUBFOLDER') . '/profile', array('controller' => 'UserController', 'method'=>'profile')
-));
-
 $routes->add('homepage', new Route(
     constant('URL_SUBFOLDER') . '/', array('controller' => 'PageController', 'method'=>'homepage')
 ));
@@ -32,6 +24,13 @@ $routes->add('signout', new Route(
     constant('URL_SUBFOLDER') . '/signout',
     array('controller' => 'UserController', 'method'=>'signout')
 ));
+
+$routes->add('profile', new Route(
+    constant('URL_SUBFOLDER') . '/users/{id}',
+    array('controller' => 'UserController', 'method'=>'profile'),
+    array('id' => '[0-9]+')
+));
+
 
 //$routes->add('handle_signup', new Route(
 //    constant('URL_SUBFOLDER') . '/handle_signup',

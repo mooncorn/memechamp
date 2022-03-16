@@ -70,7 +70,7 @@ class User {
         }
         // if user does not have an id, insert new user
         else {
-            $sql = "INSERT INTO user (username, email, password) VALUES ('$this->username', '$this->email', '$this->password')";
+            $sql = "INSERT INTO user (username, email, password, pfp) VALUES ('$this->username', '$this->email', '$this->password', '$this->pfp')";
         }
 
         mysqli_query($this->db, $sql);

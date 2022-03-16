@@ -23,7 +23,7 @@ include 'Header.php';
 
 <section class="mx-auto">
     <h1 class="text-center">Sign Up</h1>
-    <form action="signup" method="post">
+    <form enctype="multipart/form-data" action="signup" method="post">
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input type="text" name="username" class="form-control" value="<?= $username ?? '' ?>">
@@ -38,6 +38,11 @@ include 'Header.php';
             <label for="password" class="form-label">Password</label>
             <input type="password" name="password" class="form-control" value="<?= $password ?? '' ?>">
             <div class="text-danger"><?= $errors["password"] ?? "" ?></div>
+        </div>
+        <div class="mb-3">
+            <label for="pfp" class="form-label">Profile Picture</label>
+            <input type="file" name="pfp" class="form-control">
+            <div class="text-danger"><?= $errors["pfp"] ?? "" ?></div>
         </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
         <div class="text-danger"><?= $errors["main"] ?? "" ?></div>

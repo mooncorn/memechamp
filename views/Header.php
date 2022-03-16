@@ -2,7 +2,12 @@
 
 /**
  * @var RouteCollection $routes
+ * @var RequestContext $context
  */
+
+use Symfony\Component\Routing\Generator\UrlGenerator;
+
+$generator = new UrlGenerator($routes, $context);
 
 ?>
 
@@ -49,7 +54,7 @@
             <ul class="navbar-nav ms-auto">
                 <?php if (isset($_SESSION['id'])) { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $routes->get('profile')->getPath() ?>"><?=$_SESSION['username']?></a>
+                        <a class="nav-link" href="<?= $generator->generate('profile', ['id' => $_SESSION['id']]) ?>"><?= $_SESSION['username'] ?></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= $routes->get('signout')->getPath() ?>">Sign Out</a>

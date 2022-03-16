@@ -9,15 +9,13 @@ use Symfony\Component\Routing\RequestContext;
 class UserController
 {
     // Show the user attributes based on the session id
-	public function profile(RouteCollection $routes, RequestContext $context)
+	public function profile(int $id, RouteCollection $routes, RequestContext $context)
 	{
         global $db;
 
-        if (isset($_SESSION['id'])) {
-            $user = new User($db);
-            $user->load("id", $_SESSION['id']);
+        $user = new User($db);
 
-            // show view with user data
+        if ($user->load('id', $id)) {
             require_once APP_ROOT . '/views/Profile.php';
         } else {
             // redirect to login page if not logged in
@@ -63,6 +61,32 @@ class UserController
                 $user->setUsername($username);
                 $user->setEmail($email);
                 $user->setPassword($password);
+
+                // Handle profile picture upload
+                if (!empty($_FILES['pfp']['name'])) {
+                    $targetDir = APP_ROOT . '/public/images/uploads/pfps';
+                    $fileName = basename($_FILES['pfp']['name']);
+                    $fileType = pathinfo($fileName,PATHINFO_EXTENSION);
+                    $date = date('Y-m-d');
+                    $time = time();
+                    $rand = rand();
+                    $newFileName = $date . '-' . $time . '-' . $rand . '.' . $fileType;
+                    $targetFilePath = $targetDir . '/' . $newFileName; // ok
+
+                    // Allow certain file formats
+                    $allowTypes = array('jpg','png','jpeg');
+                    if(in_array($fileType, $allowTypes)) {
+                        // Upload file to server
+                        if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath)){
+                            // Insert image file name into database
+                            $user->setPfp($newFileName);
+
+                        }
+                    }
+                    else {
+                        $errors['pfp'] = 'Only JPG, JPEG & PNG files are allowed';
+                    }
+                }
 
                 $user->save();
 
