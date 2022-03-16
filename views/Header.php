@@ -3,10 +3,12 @@
 /**
  * @var RouteCollection $routes
  * @var RequestContext $context
+ * @var User $user
  */
 
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
+$belongsToCurrentUser = isset($_SESSION['id']) && isset($user) && $user->getId() == $_SESSION['id'];
 $generator = new UrlGenerator($routes, $context);
 
 ?>
@@ -25,6 +27,19 @@ $generator = new UrlGenerator($routes, $context);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 </head>
 <body>
+
+<style>
+    .pfp-wrapper {
+        /*width: 80px;*/
+        /*height: 80px;*/
+        overflow: hidden;
+    }
+    .pfp {
+        height: inherit;
+        width: inherit;
+        object-fit: cover;
+    }
+</style>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RequestContext;
 
@@ -149,5 +150,73 @@ class UserController
         unset($_SESSION['username']);
 
         header('Location: ' . $routes->get('homepage')->getPath());
+    }
+
+    public function edit_profile(int $id, RouteCollection $routes, RequestContext $context) {
+        global $db;
+        $errors = array();
+        $messages = array();
+
+        if (isset($_SESSION['id']) && $id == $_SESSION['id']) {
+
+            $user = new User($db);
+            $user->load('id', $id);
+
+            // handle username update only if current user has permission
+            if (isset($_POST['username'])) {
+                $username = filter_input(INPUT_POST, 'username');
+
+                // check if username passed filter
+                if ($username) {
+                    // check if username is unique
+                    if (!User::exists($db, 'username', $username)) {
+                        $user->setUsername($username);
+                        $user->save();
+
+                        $_SESSION['username'] = $username;
+
+                        $messages['username'] = 'Username updated successfully';
+                    } else {
+                        $errors['username'] = 'Username is taken';
+                    }
+                } else {
+                    $errors['username'] = 'Username is required';
+                }
+            }
+
+            // handle pfp update
+            if (!empty($_FILES)) {
+                if (!empty($_FILES['pfp']['name'])) {
+                    $targetDir = APP_ROOT . '/public/images/uploads/pfps';
+                    $fileName = basename($_FILES['pfp']['name']);
+                    $fileType = pathinfo($fileName,PATHINFO_EXTENSION);
+                    $date = date('Y-m-d');
+                    $time = time();
+                    $rand = rand();
+                    $newFileName = $date . '-' . $time . '-' . $rand . '.' . $fileType;
+                    $targetFilePath = $targetDir . '/' . $newFileName;
+
+                    // Allow certain file formats
+                    $allowTypes = array('jpg','png','jpeg');
+                    if(in_array($fileType, $allowTypes)) {
+                        // Upload file to server
+                        if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath)){
+                            // Insert image file name into database
+                            $user->setPfp($newFileName);
+                            $user->save();
+                            $messages['pfp'] = 'Profile picture updated successfully';
+                        }
+                    } else {
+                        $errors['pfp'] = 'Only JPG, JPEG & PNG files are allowed';
+                    }
+                } else {
+                    $errors['pfp'] = 'Image is required';
+                }
+            }
+
+            require_once APP_ROOT . '/views/EditProfile.php';
+        } else {
+            require_once APP_ROOT . '/views/Unauthorized.php';
+        }
     }
 }

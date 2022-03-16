@@ -4,12 +4,23 @@ include 'Header.php';
 /**
  * @var User $user
  * @var RouteCollection $routes
+ * @var RequestContext $context
+ * @var bool $belongsToCurrentUser
+ * @var UrlGenerator $generator
  */
-
-$belongsToCurrentUser = $user->getId() == $_SESSION['id'];
 
 ?>
     <style>
+        .pfp-wrapper {
+            width: 160px;
+            height: 160px;
+            overflow: hidden;
+        }
+        .pfp {
+            height: inherit;
+            width: inherit;
+            object-fit: cover;
+        }
         section {
             padding: 20px;
             max-width: 600px;
@@ -26,12 +37,13 @@ $belongsToCurrentUser = $user->getId() == $_SESSION['id'];
     <section class="mx-auto">
         <div class="row border rounded shadow p-3 mb-4">
             <div class="col p-0 m-0">
-                <?php if ($user->getPfp()) { ?>
-                    <img class="rounded-circle shadow" src="<?= '/'.constant('URL_SUBFOLDER').'/public/images/uploads/pfps/'.$user->getPfp() ?>" width="150px"/>
-                <?php } else { ?>
-                    <img class="rounded-circle shadow" src="<?= '/'.constant('URL_SUBFOLDER').'/public/images/uploads/pfps/defaultpfp.jpg' ?>" width="150px"/>
-                <?php } ?>
-
+                <div class="pfp-wrapper rounded-circle shadow">
+                    <?php if ($user->getPfp()) { ?>
+                        <img class="pfp" src="<?= '/'.constant('URL_SUBFOLDER').'/public/images/uploads/pfps/'.$user->getPfp() ?>"/>
+                    <?php } else { ?>
+                        <img class="pfp" src="<?= '/'.constant('URL_SUBFOLDER').'/public/images/uploads/pfps/defaultpfp.jpg' ?>"/>
+                    <?php } ?>
+                </div>
             </div>
             <div class="col py-3">
                 <h2><?= $user->getUsername() ?></h2>
@@ -40,7 +52,7 @@ $belongsToCurrentUser = $user->getId() == $_SESSION['id'];
 
             <div class="col text-end p-0 py-3">
                 <?php if ($belongsToCurrentUser) { ?>
-                    <button class="btn btn-primary shadow" href="#">Edit</button>
+                    <a class="btn btn-primary shadow" href="<?= $generator->generate('edit_profile', ['id' => $_SESSION['id']]) ?>">Edit</a>
                 <?php } ?>
             </div>
 

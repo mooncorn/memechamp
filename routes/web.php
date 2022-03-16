@@ -31,6 +31,12 @@ $routes->add('profile', new Route(
     array('id' => '[0-9]+')
 ));
 
+$routes->add('edit_profile', new Route(
+    constant('URL_SUBFOLDER') . '/users/{id}/edit',
+    array('controller' => 'UserController', 'method'=>'edit_profile'),
+    array('id' => '[0-9]+')
+));
+
 
 //$routes->add('handle_signup', new Route(
 //    constant('URL_SUBFOLDER') . '/handle_signup',
