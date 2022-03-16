@@ -4,9 +4,10 @@ namespace App\Models;
 
 use mysqli;
 
-class User extends Entity {
+class User {
     protected mysqli $db;
 
+    protected int $id;
     protected string $email;
     protected string $username;
     protected string $password;
@@ -18,8 +19,8 @@ class User extends Entity {
 
     public function __construct(mysqli $db)
     {
-        parent::__construct(0);
         $this->db = $db;
+        $this->id = 0;
         $this->email = "";
         $this->username = "";
         $this->password = "";
@@ -72,6 +73,7 @@ class User extends Entity {
         }
 
         mysqli_query($this->db, $sql);
+        $this->load("username", $this->username);
     }
 
     public static function exists(mysqli $db, string $uniqueIdentifierName, int|string $value): bool {
@@ -93,6 +95,10 @@ class User extends Entity {
         }
 
         return false;
+    }
+
+    public function isLoaded(): bool {
+        return $this->id != 0;
     }
 
     #region Getters & Setters

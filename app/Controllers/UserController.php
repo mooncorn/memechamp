@@ -8,7 +8,7 @@ use Symfony\Component\Routing\RequestContext;
 
 class UserController
 {
-  // Show the user attributes based on the session id
+    // Show the user attributes based on the session id
 	public function profile(RouteCollection $routes, RequestContext $context)
 	{
         global $db;
