@@ -11,6 +11,7 @@ class PageController
 	{
         // $generator = new UrlGenerator($routes, $context);
         // header('Location: ' . $generator->generate('profile', ['id' => '4']));
+        // change
         
         require_once APP_ROOT . '/views/Feed.php';
 	}
