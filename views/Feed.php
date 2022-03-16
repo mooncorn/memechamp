@@ -3,6 +3,7 @@ include 'Header.php';
 
 /**
  * @var RouteCollection $routes
+ * @var User $user
  */
 
 ?>
