@@ -1,19 +1,16 @@
 <?php
 
+use App\Helpers\Auth;
+use App\Helpers\Routing;
+
 /**
- * @var RouteCollection $routes
- * @var RequestContext $context
- * @var User $user
+ * @var Routing
+ * @var Auth
  */
-
-use Symfony\Component\Routing\Generator\UrlGenerator;
-
-$belongsToCurrentUser = isset($_SESSION['id']) && isset($user) && $user->getId() == $_SESSION['id'];
-$generator = new UrlGenerator($routes, $context);
 
 ?>
 
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -30,8 +27,6 @@ $generator = new UrlGenerator($routes, $context);
 
 <style>
     .pfp-wrapper {
-        /*width: 80px;*/
-        /*height: 80px;*/
         overflow: hidden;
     }
     .pfp {
@@ -43,7 +38,7 @@ $generator = new UrlGenerator($routes, $context);
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand" href="<?= $routes->get('homepage')->getPath() ?>">
+        <a class="navbar-brand" href="<?= Routing::getUrlTo('homepage') ?>">
             MemeChamp
         </a>
 
@@ -62,24 +57,24 @@ $generator = new UrlGenerator($routes, $context);
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" href="<?= $routes->get('homepage')->getPath() ?>">Feed</a>
+                    <a class="nav-link active" href="<?= Routing::getUrlTo('homepage') ?>">Feed</a>
                 </li>
             </ul>
 
             <ul class="navbar-nav ms-auto">
-                <?php if (isset($_SESSION['id'])) { ?>
+                <?php if (Auth::isAuthenticated()) { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $generator->generate('profile', ['id' => $_SESSION['id']]) ?>"><?= $_SESSION['username'] ?></a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['id' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $routes->get('signout')->getPath() ?>">Sign Out</a>
+                        <a class="nav-link" href="<?= Routing::getUrlTo('signout') ?>">Sign Out</a>
                     </li>
                 <?php } else { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $routes->get('signup')->getPath() ?>">Sign Up</a>
+                        <a class="nav-link" href="<?= Routing::getUrlTo('signup') ?>">Sign Up</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= $routes->get('signin')->getPath() ?>">Sign In</a>
+                        <a class="nav-link" href="<?= Routing::getUrlTo('signin') ?>">Sign In</a>
                     </li>
                 <?php } ?>
             </ul>

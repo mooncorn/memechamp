@@ -1,12 +1,15 @@
 <?php
+
+use App\Helpers\Auth;
+use App\Helpers\Routing;
+use App\Models\User;
+
 include 'Header.php';
 
 /**
+ * @var Auth
+ * @var Routing
  * @var User $user
- * @var RouteCollection $routes
- * @var RequestContext $context
- * @var bool $belongsToCurrentUser
- * @var UrlGenerator $generator
  */
 
 ?>
@@ -51,8 +54,8 @@ include 'Header.php';
             </div>
 
             <div class="col text-end p-0 py-3">
-                <?php if ($belongsToCurrentUser) { ?>
-                    <a class="btn btn-primary shadow" href="<?= $generator->generate('edit_profile', ['id' => $_SESSION['id']]) ?>">Edit</a>
+                <?php if (Auth::isOwner($user->getId())) { ?>
+                    <a class="btn btn-primary shadow" href="<?= Routing::getCustomUrlTo('edit_profile', ['id' => Auth::get('id')]) ?>">Edit</a>
                 <?php } ?>
             </div>
 

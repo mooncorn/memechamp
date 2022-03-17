@@ -1,10 +1,14 @@
-<?php 
+<?php
 
+use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 // Routes system
 $routes = new RouteCollection();
+
+// ================== (Start) Routes ==================
 
 $routes->add('homepage', new Route(
     constant('URL_SUBFOLDER') . '/', array('controller' => 'PageController', 'method'=>'homepage')
@@ -37,8 +41,7 @@ $routes->add('edit_profile', new Route(
     array('id' => '[0-9]+')
 ));
 
+// ================== (End) Routes ==================
 
-//$routes->add('handle_signup', new Route(
-//    constant('URL_SUBFOLDER') . '/handle_signup',
-//    array('controller' => 'UserController', 'method'=>'handle_signup'), array(), array(), '', array(), array('POST')
-//));
+// global url generator
+$generator = new UrlGenerator($routes, new RequestContext());

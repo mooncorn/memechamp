@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use mysqli;
+use Exception;
 
 class User {
-    protected mysqli $db;
-
     protected int $id;
     protected string $email;
     protected string $username;
@@ -18,9 +16,8 @@ class User {
     protected bool $is_admin;
     protected string $created_at;
 
-    public function __construct(mysqli $db)
+    public function __construct()
     {
-        $this->db = $db;
         $this->id = 0;
         $this->email = "";
         $this->username = "";
@@ -33,7 +30,11 @@ class User {
         $this->created_at = "";
     }
 
+    /**
+     * @throws Exception
+     */
     public function load(string $uniqueIdentifierName, int|string $value): bool {
+        global $db;
         $identifier = strtolower($uniqueIdentifierName);
 
         if ($identifier == 'id' || $identifier == 'username' || $identifier == 'email') {
@@ -42,20 +43,20 @@ class User {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
 
-        $result = mysqli_query($this->db, $sql);
+        $result = mysqli_query($db, $sql);
         $row = mysqli_fetch_assoc($result);
 
         if ($row) {
-          $this->setId($row["id"]);
-          $this->setEmail($row["email"]);
-          $this->setUsername($row["username"]);
-          $this->setPassword($row["password"]);
-          $this->setPfp($row["pfp"]);
-          $this->setCurrentPoggers($row["current_poggers"]);
-          $this->setMaxPoggers($row["max_poggers"]);
-          $this->setIsBanned($row["is_banned"]);
-          $this->setIsAdmin($row["is_admin"]);
-          $this->setCreatedAt($row["created_at"]);
+          $this->id = $row["id"];
+          $this->email = $row["email"];
+          $this->username = $row["username"];
+          $this->password = $row["password"];
+          $this->pfp = $row["pfp"];
+          $this->current_poggers = $row["current_poggers"];
+          $this->max_poggers = $row["max_poggers"];
+          $this->is_banned = $row["is_banned"];
+          $this->is_admin = $row["is_admin"];
+          $this->created_at = $row["created_at"];
 
           return true;
         }
@@ -63,21 +64,35 @@ class User {
         return false;
     }
 
-    public function save() {
+    public function save(): User {
+        global $db;
+
         // if user already has an id, update existing user
         if ($this->isLoaded()) {
-            $sql = "UPDATE user SET username='$this->username', email='$this->email', password='$this->password', pfp='$this->pfp', current_poggers='$this->current_poggers', max_poggers='$this->max_poggers', is_banned='$this->is_banned', is_admin='$this->is_admin' WHERE id=$this->id";
+            $sql = "UPDATE user SET 
+                username='$this->username', 
+                email='$this->email', 
+                password='$this->password', 
+                pfp='$this->pfp', 
+                current_poggers='$this->current_poggers', 
+                max_poggers='$this->max_poggers', 
+                is_banned='$this->is_banned', 
+                is_admin='$this->is_admin' 
+                WHERE id=$this->id";
         }
         // if user does not have an id, insert new user
         else {
-            $sql = "INSERT INTO user (username, email, password, pfp) VALUES ('$this->username', '$this->email', '$this->password', '$this->pfp')";
+            $sql = "INSERT INTO user (username, email, password, pfp) 
+                    VALUES ('$this->username', '$this->email', '$this->password', '$this->pfp')";
         }
 
-        mysqli_query($this->db, $sql);
+        mysqli_query($db, $sql);
         $this->load("username", $this->username);
+        return $this;
     }
 
-    public static function exists(mysqli $db, string $uniqueIdentifierName, int|string $value): bool {
+    public static function exists(string $uniqueIdentifierName, int|string $value): bool {
+        global $db;
         $identifier = strtolower($uniqueIdentifierName);
 
         if ($identifier == 'id' || $identifier == 'username' || $identifier == 'email') {
@@ -94,6 +109,14 @@ class User {
         }
 
         return false;
+    }
+
+    public static function build(string $username, string $email, string $password): User {
+        $user = new User();
+        $user->setUsername($username);
+        $user->setEmail($email);
+        $user->setPassword($password);
+        return $user;
     }
 
     public function isLoaded(): bool {
@@ -255,14 +278,6 @@ class User {
     public function getCreatedAt(): string
     {
         return $this->created_at;
-    }
-
-    /**
-     * @param string $created_at
-     */
-    public function setCreatedAt(string $created_at): void
-    {
-        $this->created_at = $created_at;
     }
     #endregion
 }

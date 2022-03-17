@@ -39,11 +39,6 @@ include 'Header.php';
             <input type="password" name="password" class="form-control" value="<?= $password ?? '' ?>">
             <div class="text-danger"><?= $errors["password"] ?? "" ?></div>
         </div>
-        <div class="mb-3">
-            <label for="pfp" class="form-label">Profile Picture</label>
-            <input type="file" name="pfp" class="form-control">
-            <div class="text-danger"><?= $errors["pfp"] ?? "" ?></div>
-        </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
         <div class="text-danger"><?= $errors["main"] ?? "" ?></div>
     </form>

@@ -1,10 +1,6 @@
 <?php
 include 'Header.php';
 
-/**
- * @var RouteCollection $routes
- */
-
 ?>
 
     <section class="py-5 px-2">

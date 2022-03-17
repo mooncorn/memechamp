@@ -19,7 +19,7 @@ class Router
     public function __invoke(RouteCollection $routes)
     {
         $context = new RequestContext();
-        $request = Request::createFromGlobals();
+//        $request = Request::createFromGlobals();
         $context->fromRequest(Request::createFromGlobals());
 
         // Routing can match routes with incoming requests

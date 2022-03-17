@@ -2,19 +2,17 @@
 
 namespace App\Controllers;
 
+use App\Helpers\Auth;
 use App\Models\User;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RequestContext;
 
 class UserController
 {
-    // Show the user attributes based on the session id
+    // Show user attributes based on the id provided in the url
 	public function profile(int $id, RouteCollection $routes, RequestContext $context)
 	{
-        global $db;
-
-        $user = new User($db);
+        $user = new User();
 
         if ($user->load('id', $id)) {
             require_once APP_ROOT . '/views/Profile.php';
@@ -26,7 +24,6 @@ class UserController
 
     public function signup(RouteCollection $routes, RequestContext $context)
     {
-        global $db;
         $errors = array();
 
         if (!empty($_POST)) {
@@ -47,53 +44,21 @@ class UserController
 
             // check unique fields
             if (!isset($errors['email'])) {
-                if (User::exists($db, 'email', $email)) {
+                if (User::exists('email', $email)) {
                     $errors['email'] = 'Email is taken';
                 }
             }
             if (!isset($errors['username'])) {
-                if (User::exists($db, 'username', $username)) {
+                if (User::exists('username', $username)) {
                     $errors['username'] = "Username is taken";
                 }
             }
 
             if (empty($errors)) {
-                $user = new User($db);
-                $user->setUsername($username);
-                $user->setEmail($email);
-                $user->setPassword($password);
-
-                // Handle profile picture upload
-                if (!empty($_FILES['pfp']['name'])) {
-                    $targetDir = APP_ROOT . '/public/images/uploads/pfps';
-                    $fileName = basename($_FILES['pfp']['name']);
-                    $fileType = pathinfo($fileName,PATHINFO_EXTENSION);
-                    $date = date('Y-m-d');
-                    $time = time();
-                    $rand = rand();
-                    $newFileName = $date . '-' . $time . '-' . $rand . '.' . $fileType;
-                    $targetFilePath = $targetDir . '/' . $newFileName; // ok
-
-                    // Allow certain file formats
-                    $allowTypes = array('jpg','png','jpeg');
-                    if(in_array($fileType, $allowTypes)) {
-                        // Upload file to server
-                        if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath)){
-                            // Insert image file name into database
-                            $user->setPfp($newFileName);
-
-                        }
-                    }
-                    else {
-                        $errors['pfp'] = 'Only JPG, JPEG & PNG files are allowed';
-                    }
-                }
-
-                $user->save();
+                $user = User::build($username, $email, $password)->save();
 
                 // add user info to the current session
-                $_SESSION['username'] = $user->getUsername();
-                $_SESSION['id'] = $user->getId();
+                Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
 
                 // redirect to homepage
                 header('Location: ' . $routes->get('homepage')->getPath());
@@ -120,15 +85,15 @@ class UserController
             }
 
             if (empty($errors)) {
-                global $db;
-                $user = new User($db);
+                $user = new User();
                 $user->load('username', $username);
 
+                // if user with provided username was found
                 if ($user->isLoaded()) {
+                    // verify if the passwords match
                     if ($user->getPassword() == $password) {
                         // add user info to the current session
-                        $_SESSION['username'] = $user->getUsername();
-                        $_SESSION['id'] = $user->getId();
+                        Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
 
                         // redirect to homepage
                         header('Location: ' . $routes->get('homepage')->getPath());
@@ -146,34 +111,33 @@ class UserController
 
     public function signout(RouteCollection $routes, RequestContext $context)
     {
-        unset($_SESSION['id']);
-        unset($_SESSION['username']);
+        Auth::clearSession();
 
         header('Location: ' . $routes->get('homepage')->getPath());
     }
 
     public function edit_profile(int $id, RouteCollection $routes, RequestContext $context) {
-        global $db;
         $errors = array();
         $messages = array();
 
-        if (isset($_SESSION['id']) && $id == $_SESSION['id']) {
+        // handle username update only if current user has permission
+        if (Auth::isOwner($id)) {
 
-            $user = new User($db);
+            $user = new User();
             $user->load('id', $id);
 
-            // handle username update only if current user has permission
+            // handle username update
             if (isset($_POST['username'])) {
                 $username = filter_input(INPUT_POST, 'username');
 
                 // check if username passed filter
                 if ($username) {
                     // check if username is unique
-                    if (!User::exists($db, 'username', $username)) {
+                    if (!User::exists('username', $username)) {
                         $user->setUsername($username);
                         $user->save();
 
-                        $_SESSION['username'] = $username;
+                        Auth::setSession(['username' => $username]);
 
                         $messages['username'] = 'Username updated successfully';
                     } else {
@@ -184,6 +148,7 @@ class UserController
                 }
             }
 
+            // TODO: refactor this eventually
             // handle pfp update
             if (!empty($_FILES)) {
                 if (!empty($_FILES['pfp']['name'])) {

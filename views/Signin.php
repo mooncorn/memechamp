@@ -1,8 +1,11 @@
 <?php
+
+use App\Helpers\Routing;
+
 include 'Header.php';
 
 /**
- * @var RouteCollection $routes
+ * @var Routing
  * @var array $errors
  * @var string $username;
  * @var string $password;
@@ -38,6 +41,6 @@ include 'Header.php';
         <div class="text-danger"><?= $errors["main"] ?? "" ?></div>
     </form>
 
-    <a href="<?php echo $routes->get('homepage')->getPath(); ?>">Back to homepage</a>
+    <a href="<?php echo Routing::getUrlTo('homepage') ?>">Back to homepage</a>
     <section>
 <?php include 'Footer.php'; ?>
