@@ -3,27 +3,37 @@
 namespace App\Controllers;
 
 use App\Helpers\Auth;
+use App\Helpers\Routing;
 use App\Models\User;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\RequestContext;
 
 class UserController
 {
     // Show user attributes based on the id provided in the url
-	public function profile(int $id, RouteCollection $routes, RequestContext $context)
-	{
+	public function profile(int $id, string $tab) {
         $user = new User();
+
+        if (strtolower($tab) == 'posts') {
+            // TODO: load posts
+            $posts = 'post list';
+        } else if (strtolower($tab) == 'comments') {
+            // TODO: load comments
+            $comments = 'comment list';
+        } else if (strtolower($tab) == 'voted') {
+            // TODO: load all posts a user voted for
+            $voted = 'post list voted by the user';
+        } else if (strtolower($tab) == 'liked') {
+            // TODO: load all liked comments
+            $liked = 'comment list like by the user';
+        }
 
         if ($user->load('id', $id)) {
             require_once APP_ROOT . '/views/Profile.php';
         } else {
-            // redirect to login page if not logged in
-            header('Location: ' . $routes->get('homepage')->getPath());
+            require_once APP_ROOT . '/views/404.php';
         }
 	}
 
-    public function signup(RouteCollection $routes, RequestContext $context)
-    {
+    public function signup() {
         $errors = array();
 
         if (!empty($_POST)) {
@@ -61,14 +71,14 @@ class UserController
                 Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
 
                 // redirect to homepage
-                header('Location: ' . $routes->get('homepage')->getPath());
+                Routing::redirectToPage('homepage');
             }
         }
 
         require_once APP_ROOT . '/views/Signup.php';
     }
 
-    public function signin(RouteCollection $routes, RequestContext $context)
+    public function signin()
     {
         $errors = array();
 
@@ -96,7 +106,7 @@ class UserController
                         Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
 
                         // redirect to homepage
-                        header('Location: ' . $routes->get('homepage')->getPath());
+                        Routing::redirectToPage('homepage');
                     } else {
                         $errors["main"] = "Invalid credentials";
                     }
@@ -109,14 +119,14 @@ class UserController
         require_once APP_ROOT . '/views/Signin.php';
     }
 
-    public function signout(RouteCollection $routes, RequestContext $context)
+    public function signout()
     {
         Auth::clearSession();
 
-        header('Location: ' . $routes->get('homepage')->getPath());
+        Routing::redirectToPage('homepage');
     }
 
-    public function edit_profile(int $id, RouteCollection $routes, RequestContext $context) {
+    public function edit_profile(int $id) {
         $errors = array();
         $messages = array();
 

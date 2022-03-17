@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+// Auth exposes helper methods that interact with user session
 class Auth
 {
     public static function isAuthenticated(): bool {

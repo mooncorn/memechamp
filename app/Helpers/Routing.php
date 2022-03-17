@@ -14,7 +14,15 @@ class Routing
         return $generator->generate($page, $parameters);
     }
 
-    public static function redirectTo(string $url) {
+    public static function redirectToURL(string $url) {
         header('Location: ' . $url);
+    }
+
+    public static function redirectToPage(string $page) {
+        header('Location: ' . Routing::getUrlTo($page));
+    }
+
+    public static function redirectToCustomPage(string $page, array $parameters) {
+        header('Location: ' . Routing::getCustomUrlTo($page, $parameters));
     }
 }

@@ -1,8 +1,10 @@
 <?php
+
+use App\Helpers\Routing;
+
 include 'Header.php';
 
 /**
- * @var RouteCollection $routes
  * @var array $errors
  * @var array $messages
  */
@@ -45,7 +47,5 @@ include 'Header.php';
             <button type="submit" class="btn btn-primary">Update</button>
         </form>
     </div>
-
-    <a href="<?php echo $routes->get('homepage')->getPath(); ?>">Back to homepage</a>
     <section>
 <?php include 'Footer.php'; ?>

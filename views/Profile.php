@@ -10,6 +10,12 @@ include 'Header.php';
  * @var Auth
  * @var Routing
  * @var User $user
+ * @var string $tab
+ *
+ * @var string|null $posts
+ * @var string|null $comments
+ * @var string|null $voted
+ * @var string|null $liked
  */
 
 ?>
@@ -63,11 +69,28 @@ include 'Header.php';
 
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link active" href="#">Posts</a>
+                <a class="nav-link <?= $tab == 'posts' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId()]) ?>">Posts</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Comments</a>
+                <a class="nav-link <?= $tab == 'comments' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId(), 'tab' => 'comments']) ?>">Comments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= $tab == 'voted' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId(), 'tab' => 'voted']) ?>">Voted</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?= $tab == 'liked' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId(), 'tab' => 'liked']) ?>">Liked</a>
             </li>
         </ul>
+
+        <?php if (isset($posts)) { ?>
+            <?= $posts ?>
+        <?php } else if (isset($comments)) { ?>
+            <?= $comments ?>
+        <?php } else if (isset($voted)) { ?>
+            <?= $voted ?>
+        <?php } else if (isset($liked)) { ?>
+            <?= $liked ?>
+        <?php } ?>
+
     <section>
 <?php include 'Footer.php'; ?>

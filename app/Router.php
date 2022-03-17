@@ -19,7 +19,6 @@ class Router
     public function __invoke(RouteCollection $routes)
     {
         $context = new RequestContext();
-//        $request = Request::createFromGlobals();
         $context->fromRequest(Request::createFromGlobals());
 
         // Routing can match routes with incoming requests
@@ -42,7 +41,7 @@ class Router
             $classInstance = new $className();
     
             // Add routes as paramaters to the next class
-            $params = array_merge(array_slice($matcher, 2, -1), array('routes' => $routes, 'context' => $context));
+            $params = array_merge(array_slice($matcher, 2, -1), []);
 
             call_user_func_array(array($classInstance, $matcher['method']), $params);
             
