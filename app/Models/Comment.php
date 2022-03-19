@@ -6,9 +6,10 @@ class Comment
 {
     private int $id;
     private string $content;
-    private int $owner_id;
+    private int|null $owner_id;
     private int|null $reply_to_id;
     private int $post_id;
+    private bool $deleted;
     private string $created_at;
 
     private CommentCollection $replies; // an array of comments
@@ -17,9 +18,10 @@ class Comment
     {
         $this->id = 0;
         $this->content = "";
-        $this->owner_id = 0;
+        $this->owner_id = null;
         $this->reply_to_id = null;
         $this->post_id = 0;
+        $this->deleted = false;
         $this->created_at = "";
         $this->replies = new CommentCollection($indentation);
     }
@@ -38,6 +40,7 @@ class Comment
             $this->owner_id = $row['owner_id'];
             $this->reply_to_id = $row["reply_to_id"];
             $this->post_id = $row["post_id"];
+            $this->deleted = $row['deleted'];
             $this->created_at = $row["created_at"];
 
             // every comment will load its own replies
@@ -55,7 +58,8 @@ class Comment
         // if comment already has an id, update existing comment
         if ($this->isLoaded()) {
             $sql = "UPDATE comment SET 
-                content='$this->content'
+                content='$this->content',
+                deleted='$this->deleted'
                 WHERE id=$this->id";
         }
         // if comment does not have an id, insert new comment
@@ -79,6 +83,21 @@ class Comment
     public function loadReplies()
     {
         $this->replies->load('reply_to_id', $this->id);
+    }
+
+    public function delete() {
+        $this->deleted = true;
+        $this->save();
+    }
+
+    public function getOwner(): ?User
+    {
+        $owner = new User();
+        if ($owner->load('id', $this->owner_id)) {
+            return $owner;
+        }
+
+        return null;
     }
 
     #region Getters & Setters
@@ -179,28 +198,35 @@ class Comment
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getOwnerId(): int
+    public function getOwnerId(): int|null
     {
         return $this->owner_id;
     }
 
     /**
-     * @param int $owner_id
+     * @param int|null $owner_id
      */
-    public function setOwnerId(int $owner_id): void
+    public function setOwnerId(int|null $owner_id): void
     {
         $this->owner_id = $owner_id;
     }
 
-    public function getOwner(): User
+    /**
+     * @return bool
+     */
+    public function isDeleted(): bool
     {
-        $owner = new User();
-        $owner->load('id', $this->owner_id);
-        return $owner;
+        return $this->deleted;
     }
 
-
+    /**
+     * @param bool $deleted
+     */
+    public function setDeleted(bool $deleted): void
+    {
+        $this->deleted = $deleted;
+    }
     #endregion
 }
