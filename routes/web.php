@@ -56,6 +56,12 @@ $routes->add('edit_profile', new Route(
     array('id' => '[0-9]+')
 ));
 
+$routes->add('post', new Route(
+    constant('URL_SUBFOLDER') . '/post/{id}',
+    array('controller' => 'PostController', 'method'=>'show'),
+    array('id' => '[0-9]+')
+));
+
 // ================== (End) Routes ==================
 
 // global url generator
