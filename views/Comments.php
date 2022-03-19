@@ -26,17 +26,34 @@ function renderComments(CommentCollection $commentCollection) {
                 <div>
                     <div class="d-flex justify-content-between">
                         <div class='d-flex'>
-                            <h5><a href='<?= $linkToOwnerProfile ?>'><?= $username ?></a></h5>
+
+                            <?php if ($comment->isDeleted()) { ?>
+                                <h5><a href='#'>[deleted]</a></h5>
+                            <?php } else { ?>
+                                <h5><a href='<?= $linkToOwnerProfile ?>'><?= $username ?></a></h5>
+                            <?php } ?>
+
                             <small class='ms-2 mt-1' style='text-indent: 0'><?= $createdAt ?></small>
                         </div>
-                        <?php if (Auth::isOwner($comment->getOwnerId())) { ?>
-                        <div style='text-indent: 0'>
-                            <a href='#'>Edit</a>
-                            <a href='#'>Delete</a>
-                        </div>
+
+                        <?php if (!$comment->isDeleted()) { ?>
+                            <?php if (Auth::isOwner($comment->getOwnerId())) { ?>
+                                <div style='text-indent: 0'>
+                                    <a href='#'>Edit</a>
+                                    <a href="<?= Routing::getCustomUrlTo('delete_comment', ['id' => $comment->getId()]) ?>">Delete</a>
+                                </div>
+                            <?php } ?>
                         <?php } ?>
+
+
                     </div>
-                    <p><?= $content ?></p>
+
+                    <?php if ($comment->isDeleted()) { ?>
+                        <p>[deleted]</p>
+                    <?php } else { ?>
+                        <p><?= $content ?></p>
+                    <?php } ?>
+
                 </div>
             </div>
 
