@@ -10,6 +10,7 @@ class Comment
     private int|null $reply_to_id;
     private int $post_id;
     private bool $deleted;
+    private bool $edited;
     private string $created_at;
 
     private CommentCollection $replies; // an array of comments
@@ -22,6 +23,7 @@ class Comment
         $this->reply_to_id = null;
         $this->post_id = 0;
         $this->deleted = false;
+        $this->edited = false;
         $this->created_at = "";
         $this->replies = new CommentCollection($indentation);
     }
@@ -41,6 +43,7 @@ class Comment
             $this->reply_to_id = $row["reply_to_id"];
             $this->post_id = $row["post_id"];
             $this->deleted = $row['deleted'];
+            $this->edited = $row['edited'];
             $this->created_at = $row["created_at"];
 
             // every comment will load its own replies
@@ -59,7 +62,8 @@ class Comment
         if ($this->isLoaded()) {
             $sql = "UPDATE comment SET 
                 content='$this->content',
-                deleted='$this->deleted'
+                deleted='$this->deleted',
+                edited='true'
                 WHERE id=$this->id";
         }
         // if comment does not have an id, insert new comment
@@ -228,5 +232,23 @@ class Comment
     {
         $this->deleted = $deleted;
     }
+
+    /**
+     * @return bool
+     */
+    public function isEdited(): bool
+    {
+        return $this->edited;
+    }
+
+    /**
+     * @param bool $edited
+     */
+    public function setEdited(bool $edited): void
+    {
+        $this->edited = $edited;
+    }
+
+
     #endregion
 }
