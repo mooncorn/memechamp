@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\CommentCollection;
 
@@ -19,7 +20,27 @@ function renderComments(CommentCollection $commentCollection) {
             $linkToOwnerProfile = Routing::getCustomUrlTo('profile', ['id' => $comment->getOwnerId()]);
             $content = $comment->getContent();
 
-            echo "<div style='text-indent: $indentationInPx'><div><div class='d-flex'><h5><a href='$linkToOwnerProfile'>$username</a></h5><small class='ms-2 mt-1' style='text-indent: 0'>$createdAt</small></div><p>$content</p></div></div>";
+            ?>
+
+            <div style="text-indent: <?= $indentationInPx?>">
+                <div>
+                    <div class="d-flex justify-content-between">
+                        <div class='d-flex'>
+                            <h5><a href='<?= $linkToOwnerProfile ?>'><?= $username ?></a></h5>
+                            <small class='ms-2 mt-1' style='text-indent: 0'><?= $createdAt ?></small>
+                        </div>
+                        <?php if (Auth::isOwner($comment->getOwnerId())) { ?>
+                        <div style='text-indent: 0'>
+                            <a href='#'>Edit</a>
+                            <a href='#'>Delete</a>
+                        </div>
+                        <?php } ?>
+                    </div>
+                    <p><?= $content ?></p>
+                </div>
+            </div>
+
+            <?php
 
             renderComments($comment->getReplies());
         }
