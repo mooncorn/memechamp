@@ -11,20 +11,7 @@ class UserController
     // Show user attributes based on the id provided in the url
 	public function profile(int $id, string $tab) {
         $user = new User();
-
-        if (strtolower($tab) == 'posts') {
-            // TODO: load posts
-            $posts = 'post list';
-        } else if (strtolower($tab) == 'comments') {
-            // TODO: load comments
-            $comments = 'comment list';
-        } else if (strtolower($tab) == 'voted') {
-            // TODO: load all posts a user voted for
-            $voted = 'post list voted by the user';
-        } else if (strtolower($tab) == 'liked') {
-            // TODO: load all liked comments
-            $liked = 'comment list like by the user';
-        }
+        $user->load('id', $id);
 
         if ($user->load('id', $id)) {
             require_once APP_ROOT . '/views/Profile.php';

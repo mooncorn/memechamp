@@ -56,6 +56,12 @@ $routes->add('edit_profile', new Route(
     array('id' => '[0-9]+')
 ));
 
+$routes->add('comments', new Route(
+    constant('URL_SUBFOLDER') . '/post/{id}/comments',
+    array('controller' => 'PageController', 'method'=>'comments'),
+    array('id' => '[0-9]+')
+));
+
 // ================== (End) Routes ==================
 
 // global url generator
