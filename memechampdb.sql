@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 19, 2022 at 07:53 PM
+-- Generation Time: Mar 19, 2022 at 08:21 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -34,6 +34,7 @@ CREATE TABLE `comment` (
   `reply_to_id` int(11) DEFAULT NULL,
   `post_id` int(11) NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `edited` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -41,12 +42,12 @@ CREATE TABLE `comment` (
 -- Dumping data for table `comment`
 --
 
-INSERT INTO `comment` (`id`, `content`, `owner_id`, `reply_to_id`, `post_id`, `deleted`, `created_at`) VALUES
-(2, 'so what now?', 1, NULL, 1, 1, '2022-03-19'),
-(3, 'we need to create more features!', 6, 2, 1, 0, '2022-03-19'),
-(4, 'wow this is great!', 3, NULL, 1, 0, '2022-03-19'),
-(7, 'hahah', 4, 2, 1, 0, '2022-03-19'),
-(8, 'whats so funny', 5, 7, 1, 0, '2022-03-19');
+INSERT INTO `comment` (`id`, `content`, `owner_id`, `reply_to_id`, `post_id`, `deleted`, `edited`, `created_at`) VALUES
+(2, 'so what now?', 1, NULL, 1, 1, 0, '2022-03-19'),
+(3, 'we need to create more features!', 6, 2, 1, 0, 0, '2022-03-19'),
+(4, 'wow this is great!', 3, NULL, 1, 0, 0, '2022-03-19'),
+(7, 'hahah', 4, 2, 1, 0, 0, '2022-03-19'),
+(8, 'whats so funny', 5, 7, 1, 0, 0, '2022-03-19');
 
 -- --------------------------------------------------------
 
