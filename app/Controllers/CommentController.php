@@ -16,6 +16,8 @@ class CommentController
 
                 $postId = $comment->getPostId();
                 Routing::redirectToCustomPage('comments', ['id' => $postId]);
+            } else {
+                require_once APP_ROOT . '/views/Unauthorized.php';
             }
         } else {
             require_once APP_ROOT . '/views/404.php';
