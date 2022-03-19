@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 15, 2022 at 07:34 PM
+-- Generation Time: Mar 19, 2022 at 01:37 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -24,6 +24,47 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `comment`
+--
+
+CREATE TABLE `comment` (
+  `id` int(11) NOT NULL,
+  `content` varchar(255) NOT NULL,
+  `reply_to_id` int(11) NOT NULL,
+  `post_id` int(11) NOT NULL,
+  `created_at` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `competition`
+--
+
+CREATE TABLE `competition` (
+  `id` int(11) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `post`
+--
+
+CREATE TABLE `post` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comp_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `img` varchar(255) NOT NULL,
+  `created_at` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user`
 --
 
@@ -32,10 +73,11 @@ CREATE TABLE `user` (
   `username` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
-  `pfp` varchar(255) DEFAULT NULL,
+  `pfp` varchar(255) NOT NULL DEFAULT '',
   `current_poggers` int(11) NOT NULL DEFAULT 10,
   `max_poggers` int(11) NOT NULL DEFAULT 10,
-  `isBanned` tinyint(1) NOT NULL DEFAULT 0,
+  `is_banned` tinyint(1) NOT NULL DEFAULT 0,
+  `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -43,17 +85,50 @@ CREATE TABLE `user` (
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `username`, `email`, `password`, `pfp`, `current_poggers`, `max_poggers`, `isBanned`, `created_at`) VALUES
-(1, 'test', 'test@test.com', 'test', NULL, 10, 10, 0, '2022-03-15'),
-(3, 'test1', 'test1@test.com', 'test', NULL, 10, 10, 0, '2022-03-15'),
-(4, 'test2', 'test2@test.com', 'test', NULL, 10, 10, 0, '2022-03-15'),
-(5, 'test3', 'test3@test.com', 'test', NULL, 10, 10, 0, '2022-03-15'),
-(6, 'test4', 'test4@test.com', 'test', NULL, 10, 10, 0, '2022-03-15'),
-(7, 'test5', 'test5@test.com', 'test', NULL, 10, 10, 0, '2022-03-15');
+INSERT INTO `user` (`id`, `username`, `email`, `password`, `pfp`, `current_poggers`, `max_poggers`, `is_banned`, `is_admin`, `created_at`) VALUES
+(1, 'test', 'test@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(3, 'test1', 'test1@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(4, 'test2', 'test2@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(5, 'test3', 'test3@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(6, 'test4', 'test4@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(7, 'test5', 'test5@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(8, 'test7', 'test7@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(9, 'test8', 'test6@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(10, 'test9', 'test9@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(11, 'test10', 'test10@gmail.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(12, 'ddddd', 'ddd@fdsaf.com', 'fdsaf', '', 10, 10, 0, 0, '2022-03-15'),
+(13, 'gdfsgd', 'gdsfgd@gfd', 'dad', '', 10, 10, 0, 0, '2022-03-15'),
+(14, 'p1', 'p1@p', 'p', '', 10, 10, 0, 0, '2022-03-15'),
+(15, 'p2', 'p2@p', 'p', '', 10, 10, 0, 0, '2022-03-15'),
+(16, 'p3', 'p3@p', 'p', '', 10, 10, 0, 0, '2022-03-15'),
+(17, 'p4', 'p4@p', 'p', '2022-03-16-1647399482-1323223134.jpg', 10, 10, 0, 0, '2022-03-15'),
+(18, 'horde', 'horde@horde', 'horde', '2022-03-17-1647529609-853729986.jpg', 10, 10, 0, 0, '2022-03-17');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `comment`
+--
+ALTER TABLE `comment`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_fk` (`reply_to_id`),
+  ADD KEY `post_fk` (`post_id`);
+
+--
+-- Indexes for table `competition`
+--
+ALTER TABLE `competition`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `post`
+--
+ALTER TABLE `post`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_fk` (`user_id`),
+  ADD KEY `comp_id` (`comp_id`);
 
 --
 -- Indexes for table `user`
@@ -68,10 +143,46 @@ ALTER TABLE `user`
 --
 
 --
+-- AUTO_INCREMENT for table `comment`
+--
+ALTER TABLE `comment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `competition`
+--
+ALTER TABLE `competition`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `post`
+--
+ALTER TABLE `post`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `comment`
+--
+ALTER TABLE `comment`
+  ADD CONSTRAINT `comment_post_fk` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `comment_reply_to_fk` FOREIGN KEY (`reply_to_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `post`
+--
+ALTER TABLE `post`
+  ADD CONSTRAINT `post_comp_fk` FOREIGN KEY (`comp_id`) REFERENCES `competition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `post_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
