@@ -5,16 +5,16 @@ namespace App\Models;
 use Exception;
 
 class User {
-    protected int $id;
-    protected string $email;
-    protected string $username;
-    protected string $password;
-    protected string $pfp;
-    protected int $current_poggers;
-    protected int $max_poggers;
-    protected bool $is_banned;
-    protected bool $is_admin;
-    protected string $created_at;
+    private int $id;
+    private string $email;
+    private string $username;
+    private string $password;
+    private string $pfp;
+    private int $current_poggers;
+    private int $max_poggers;
+    private bool $is_banned;
+    private bool $is_admin;
+    private string $created_at;
 
     public function __construct()
     {
@@ -33,7 +33,7 @@ class User {
     /**
      * @throws Exception
      */
-    public function load(string $uniqueIdentifierName, int|string $value): bool {
+    public function load(string $uniqueIdentifierName, int|string $value): ?User {
         global $db;
         $identifier = strtolower($uniqueIdentifierName);
 
@@ -58,13 +58,13 @@ class User {
           $this->is_admin = $row["is_admin"];
           $this->created_at = $row["created_at"];
 
-          return true;
+          return $this;
         }
 
-        return false;
+        return null;
     }
 
-    public function save(): User {
+    public function save(): ?User {
         global $db;
 
         // if user already has an id, update existing user
@@ -87,8 +87,12 @@ class User {
         }
 
         mysqli_query($db, $sql);
-        $this->load("username", $this->username);
-        return $this;
+
+        if ($this->load("username", $this->username)) {
+            return $this;
+        }
+
+        return null;
     }
 
     public static function exists(string $uniqueIdentifierName, int|string $value): bool {
@@ -279,5 +283,16 @@ class User {
     {
         return $this->created_at;
     }
+
+    /**
+     * @return CommentCollection
+     */
+    public function getCommentCollection(): CommentCollection
+    {
+        $comments = new CommentCollection();
+        $comments->load('owner_id', $this->id);
+        return $comments;
+    }
+
     #endregion
 }

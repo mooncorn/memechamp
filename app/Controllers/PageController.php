@@ -2,27 +2,20 @@
 
 namespace App\Controllers;
 
-use App\Models\User;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\RequestContext;
+use App\Models\CommentCollection;
 
 class PageController
 {
 	public function homepage()
 	{
-        $user = new User();
-        $user->setUsername('john');
-        $user->setPassword('john');
-        $user->setEmail('john@gmail.com');
-        $user->save();
-
-
-        $user1 = new User();
-        $user1->load('id', 1);
-        $user->setUsername('changedtest');
-        $user->save();
-
-
         require_once APP_ROOT . '/views/Feed.php';
-	}
+    }
+
+    public function comments(int $id) {
+        // get a list of comments
+        $commentCollection = new CommentCollection();
+        $commentCollection->load('post_id', $id);
+
+        require_once APP_ROOT . '/views/Comments.php';
+    }
 }

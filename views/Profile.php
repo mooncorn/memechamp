@@ -11,12 +11,21 @@ include 'Header.php';
  * @var Routing
  * @var User $user
  * @var string $tab
- *
- * @var string|null $posts
- * @var string|null $comments
- * @var string|null $voted
- * @var string|null $liked
  */
+
+function renderComments(array $comments) {
+    if (empty($comments)) {
+        echo "no comments";
+        return;
+    }
+
+    echo "<ul class='list-group mt-3'>";
+    foreach ($comments as $comment) {
+        $content = $comment->getContent();
+        echo "<li class='list-group-item'>$content</li>";
+    }
+    echo "</ul>";
+}
 
 ?>
     <style>
@@ -82,15 +91,11 @@ include 'Header.php';
             </li>
         </ul>
 
-        <?php if (isset($posts)) { ?>
-            <?= $posts ?>
-        <?php } else if (isset($comments)) { ?>
-            <?= $comments ?>
-        <?php } else if (isset($voted)) { ?>
-            <?= $voted ?>
-        <?php } else if (isset($liked)) { ?>
-            <?= $liked ?>
-        <?php } ?>
+        <?php
+            if ($tab == 'comments') {
+                renderComments($user->getCommentCollection()->getComments());
+            }
+        ?>
 
     <section>
 <?php include 'Footer.php'; ?>
