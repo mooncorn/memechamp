@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 19, 2022 at 06:39 PM
+-- Generation Time: Mar 19, 2022 at 07:53 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -30,9 +30,10 @@ SET time_zone = "+00:00";
 CREATE TABLE `comment` (
   `id` int(11) NOT NULL,
   `content` varchar(255) NOT NULL,
-  `owner_id` int(11) NOT NULL,
+  `owner_id` int(11) DEFAULT NULL,
   `reply_to_id` int(11) DEFAULT NULL,
   `post_id` int(11) NOT NULL,
+  `deleted` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -40,12 +41,12 @@ CREATE TABLE `comment` (
 -- Dumping data for table `comment`
 --
 
-INSERT INTO `comment` (`id`, `content`, `owner_id`, `reply_to_id`, `post_id`, `created_at`) VALUES
-(2, 'so what now?', 1, NULL, 1, '2022-03-19'),
-(3, 'we need to create more features!', 6, 2, 1, '2022-03-19'),
-(4, 'wow this is great!', 3, NULL, 1, '2022-03-19'),
-(7, 'hahah', 4, 2, 1, '2022-03-19'),
-(8, 'whats so funny', 5, 7, 1, '2022-03-19');
+INSERT INTO `comment` (`id`, `content`, `owner_id`, `reply_to_id`, `post_id`, `deleted`, `created_at`) VALUES
+(2, 'so what now?', 1, NULL, 1, 1, '2022-03-19'),
+(3, 'we need to create more features!', 6, 2, 1, 0, '2022-03-19'),
+(4, 'wow this is great!', 3, NULL, 1, 0, '2022-03-19'),
+(7, 'hahah', 4, 2, 1, 0, '2022-03-19'),
+(8, 'whats so funny', 5, 7, 1, 0, '2022-03-19');
 
 -- --------------------------------------------------------
 
@@ -74,7 +75,7 @@ INSERT INTO `competition` (`id`, `is_active`, `created_at`) VALUES
 
 CREATE TABLE `post` (
   `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
   `comp_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `img` varchar(255) NOT NULL,
@@ -202,16 +203,16 @@ ALTER TABLE `user`
 -- Constraints for table `comment`
 --
 ALTER TABLE `comment`
-  ADD CONSTRAINT `comment_owner_fk` FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `comment_owner_fk` FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `comment_post_fk` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `comment_reply_to_fk` FOREIGN KEY (`reply_to_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `comment_reply_to_fk` FOREIGN KEY (`reply_to_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `post`
 --
 ALTER TABLE `post`
   ADD CONSTRAINT `post_comp_fk` FOREIGN KEY (`comp_id`) REFERENCES `competition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `post_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `post_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
