@@ -12,9 +12,10 @@ class PageController
     }
 
     public function comments(int $id) {
+        global $pdo;
         // get a list of comments
         $commentCollection = new CommentCollection();
-        $commentCollection->load('post_id', $id);
+        $commentCollection->load($pdo, 'post_id', $id);
 
         require_once APP_ROOT . '/views/Comments.php';
     }

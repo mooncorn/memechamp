@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use PDO;
+
 class Comment
 {
     private int $id;
@@ -28,13 +30,9 @@ class Comment
         $this->replies = new CommentCollection($indentation);
     }
 
-    public function load(int $id): ?Comment
+    public function load(PDO $pdo, int $id): ?Comment
     {
-        global $db;
-        $sql = "SELECT * FROM comment WHERE id=$id";
-
-        $result = mysqli_query($db, $sql);
-        $row = mysqli_fetch_assoc($result);
+        $row = $pdo->query("SELECT * FROM comment WHERE id=$id")->fetch();
 
         if ($row) {
             $this->id = $row["id"];
@@ -47,7 +45,7 @@ class Comment
             $this->created_at = $row["created_at"];
 
             // every comment will load its own replies
-            $this->loadReplies();
+            $this->loadReplies($pdo);
 
             return $this;
         }
@@ -55,25 +53,19 @@ class Comment
         return null;
     }
 
-    public function save(): ?Comment {
-        global $db;
-
+    public function save(PDO $pdo): ?Comment {
         // if comment already has an id, update existing comment
         if ($this->isLoaded()) {
-            $sql = "UPDATE comment SET 
-                content='$this->content',
-                deleted='$this->deleted',
-                edited='true'
-                WHERE id=$this->id";
+            $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited='true' WHERE id=?");
+            $stmt->execute([$this->content, $this->deleted, $this->id]);
         }
         // if comment does not have an id, insert new comment
         else {
-            $sql = "INSERT INTO comment (content, reply_to_id, post_id)
-                    VALUES ('$this->content', '$this->reply_to_id', '$this->post_id')";
+            $stmt = $pdo->prepare("INSERT INTO comment (content, reply_to_id, post_id) VALUES (?, ?, ?)");
+            $stmt->execute([$this->content, $this->reply_to_id, $this->post_id]);
         }
 
-        mysqli_query($db, $sql);
-        if ($this->load($this->id)) {
+        if ($this->load($pdo, $this->id)) {
             return $this;
         } else {
             return null;
@@ -84,20 +76,15 @@ class Comment
         return $this->id != 0;
     }
 
-    public function loadReplies()
+    public function loadReplies(PDO $pdo)
     {
-        $this->replies->load('reply_to_id', $this->id);
+        $this->replies->load($pdo, 'reply_to_id', $this->id);
     }
 
-    public function delete() {
-        $this->deleted = true;
-        $this->save();
-    }
-
-    public function getOwner(): ?User
+    public function getOwner(PDO $pdo): ?User
     {
         $owner = new User();
-        if ($owner->load('id', $this->owner_id)) {
+        if ($owner->load($pdo, 'id', $this->owner_id)) {
             return $owner;
         }
 

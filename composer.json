@@ -9,6 +9,6 @@
   "require": {
     "symfony/routing": "^6.0.5",
     "symfony/http-foundation": "^6.0.6",
-    "ext-mysqli": "*"
+    "ext-pdo": "*"
   }
 }

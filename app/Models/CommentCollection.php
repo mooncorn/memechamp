@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\Routing;
 use Exception;
+use PDO;
 
 class CommentCollection
 {
@@ -16,9 +18,8 @@ class CommentCollection
         $this->indentation = $indentation;
     }
 
-    public function load(string $index, int $value)
+    public function load(PDO $pdo, string $index, int $value)
     {
-        global $db;
         $identifier = strtolower($index);
 
         if ($identifier == 'post_id') {
@@ -29,13 +30,23 @@ class CommentCollection
             throw new Exception('Invalid index. Must be reply_to_id, post_id or owner_id.');
         }
 
-        $result = mysqli_query($db, $sql);
+        $stmt = $pdo->query($sql);
 
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $stmt->fetch()) {
             $comment = new Comment($this->indentation + 1);
-            $comment->load($row['id']);
+            $comment->load($pdo, $row['id']);
             $this->comments[] = $comment;
         }
+    }
+
+    /*
+     * return [
+     *  ['indent'=>int, 'owner_username'=>string, 'created_at'=>string, 'content'=>string],
+     *  ...
+     * ]
+     */
+    public static function formatForDisplay(CommentCollection $commentCollection) {
+
     }
 
     /**
