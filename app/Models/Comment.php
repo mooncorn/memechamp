@@ -71,7 +71,7 @@ class Comment
         {
             if ($this->id != 0)
             {
-                $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited='true' WHERE id=?");
+                $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited=1 WHERE id=?");
                 $stmt->execute([$this->content, $this->deleted, $this->id]);
             }
             else
