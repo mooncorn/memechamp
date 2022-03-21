@@ -51,14 +51,25 @@ $routes->add('profile', new Route(
 ));
 
 $routes->add('edit_profile', new Route(
-    constant('URL_SUBFOLDER') . '/edit/user/{id}',
+    constant('URL_SUBFOLDER') . '/user/{id}/edit',
     array('controller' => 'UserController', 'method'=>'edit_profile'),
     array('id' => '[0-9]+')
 ));
 
 $routes->add('post', new Route(
     constant('URL_SUBFOLDER') . '/post/{id}',
-    array('controller' => 'PostController', 'method'=>'show'),
+    array('controller' => 'PostController', 'method'=>'show')
+));
+	
+$routes->add('comments', new Route(
+    constant('URL_SUBFOLDER') . '/post/{id}/comments',
+    array('controller' => 'PageController', 'method'=>'comments'),
+    array('id' => '[0-9]+')
+));
+
+$routes->add('delete_comment', new Route(
+    constant('URL_SUBFOLDER') . '/comment/{id}/delete',
+    array('controller' => 'CommentController', 'method'=>'deleteOne'),
     array('id' => '[0-9]+')
 ));
 
