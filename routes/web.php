@@ -87,7 +87,7 @@ $routes->add('reply_to_post', new Route(
 ));
 
 $routes->add('edit_comment', new Route(
-    constant('URL_SUBFOLDER') . '/comment/{id}/delete',
+    constant('URL_SUBFOLDER') . '/comment/{id}/edit',
     array('controller' => 'CommentController', 'method'=>'editComment'),
     array('id' => '[0-9]+')
 ));

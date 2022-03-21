@@ -108,4 +108,79 @@ class CommentController
 
         require_once APP_ROOT . '/views/ReplyToComment.php';
     }
+
+    public function replyToPost(int $id)
+    {
+        global $pdo;
+        $errors = [];
+
+        if (!Auth::isAuthenticated())
+        {
+            Routing::redirectToPage('signin');
+            return;
+        }
+
+        if (isset($_POST['content']))
+        {
+            $content = filter_input(INPUT_POST, 'content');
+
+            if ($content)
+            {
+                $newComment = new Comment();
+                $newComment->setContent($content);
+                $newComment->setOwnerId(Auth::get('id'));
+                $newComment->setPostId($id);
+                $newComment->save($pdo);
+
+                Routing::redirectToCustomPage('post_comments', ['id'=>$id]);
+            }
+            else
+            {
+                $errors['content'] = 'Message is required';
+            }
+        }
+
+        require_once APP_ROOT . '/views/ReplyToPost.php';
+    }
+
+    public function editComment(int $id) {
+        global $pdo;
+        $errors = [];
+
+        if (!Auth::isAuthenticated())
+        {
+            Routing::redirectToPage('signin');
+            return;
+        }
+
+        $comment = new Comment();
+        $comment->load($pdo, $id);
+
+        if (!Auth::isOwner($comment->getOwnerId()))
+        {
+            require_once APP_ROOT . '/views/Unauthorized.php';
+            return;
+        }
+
+        $content = $comment->getContent();
+
+        if (isset($_POST['content']))
+        {
+            $content = filter_input(INPUT_POST, 'content');
+
+            if ($content)
+            {
+                $comment->setContent($content);
+                $comment->save($pdo);
+
+                Routing::redirectToCustomPage('comments', ['id'=>$id]);
+            }
+            else
+            {
+                $errors['content'] = 'Message is required';
+            }
+        }
+        
+        require_once APP_ROOT . '/views/EditComment.php';
+    }
 }

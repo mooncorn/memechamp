@@ -11,6 +11,7 @@ include 'Header.php';
  * @var Comment $comment
  * @var User $user owner of the comment
  * @var array $errors
+ * @var string $content
  */
 
 function renderComments(array $comments) {
@@ -102,7 +103,7 @@ function renderComments(array $comments) {
             <form method="post">
                 <div class="mb-3">
                     <label for="content" class="form-label">Message</label>
-                    <textarea type="text" name="content" class="form-control" value="<?= $username ?? '' ?>"></textarea>
+                    <textarea type="text" name="content" class="form-control" value="<?= $content ?? '' ?>"></textarea>
                     <div class="text-danger"><?= $errors["content"] ?? "" ?></div>
                 </div>
                 <button type="submit" class="btn btn-primary">Reply</button>
