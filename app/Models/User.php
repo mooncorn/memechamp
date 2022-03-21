@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Exception;
+use PDO;
 
 class User {
     private int $id;
@@ -33,18 +34,15 @@ class User {
     /**
      * @throws Exception
      */
-    public function load(string $uniqueIdentifierName, int|string $value): ?User {
-        global $db;
+    public function load(PDO $pdo, string $uniqueIdentifierName, int|string $value): ?User {
         $identifier = strtolower($uniqueIdentifierName);
 
-        if ($identifier == 'id' || $identifier == 'username' || $identifier == 'email') {
-            $sql = "SELECT * FROM user WHERE $identifier='$value'";
-        } else {
+        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email') {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
 
-        $result = mysqli_query($db, $sql);
-        $row = mysqli_fetch_assoc($result);
+        $stmt = $pdo->query("SELECT * FROM user WHERE $identifier='$value'");
+        $row = $stmt->fetch();
 
         if ($row) {
           $this->id = $row["id"];
@@ -64,49 +62,34 @@ class User {
         return null;
     }
 
-    public function save(): ?User {
-        global $db;
-
+    public function save(PDO $pdo): ?User {
         // if user already has an id, update existing user
         if ($this->isLoaded()) {
-            $sql = "UPDATE user SET 
-                username='$this->username', 
-                email='$this->email', 
-                password='$this->password', 
-                pfp='$this->pfp', 
-                current_poggers='$this->current_poggers', 
-                max_poggers='$this->max_poggers', 
-                is_banned='$this->is_banned', 
-                is_admin='$this->is_admin' 
-                WHERE id=$this->id";
+            $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, current_poggers=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
+            $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->current_poggers, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
         }
         // if user does not have an id, insert new user
         else {
-            $sql = "INSERT INTO user (username, email, password, pfp) 
-                    VALUES ('$this->username', '$this->email', '$this->password', '$this->pfp')";
+            $stmt = $pdo->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
+            $stmt->execute([$this->username, $this->email, $this->password]);
         }
 
-        mysqli_query($db, $sql);
-
-        if ($this->load("username", $this->username)) {
+        if ($this->load($pdo, "username", $this->username)) {
             return $this;
         }
 
         return null;
     }
 
-    public static function exists(string $uniqueIdentifierName, int|string $value): bool {
-        global $db;
+    public static function exists(PDO $pdo, string $uniqueIdentifierName, int|string $value): bool {
         $identifier = strtolower($uniqueIdentifierName);
 
-        if ($identifier == 'id' || $identifier == 'username' || $identifier == 'email') {
-            $sql = "SELECT * FROM user WHERE $identifier='$value'";
-        } else {
+        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email') {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
 
-        $result = mysqli_query($db, $sql);
-        $row = mysqli_fetch_assoc($result);
+        $stmt = $pdo->query("SELECT * FROM user WHERE $identifier='$value'");
+        $row = $stmt->fetch();
 
         if ($row) {
             return true;
@@ -287,10 +270,10 @@ class User {
     /**
      * @return CommentCollection
      */
-    public function getCommentCollection(): CommentCollection
+    public function getCommentCollection($pdo): CommentCollection
     {
         $comments = new CommentCollection();
-        $comments->load('owner_id', $this->id);
+        $comments->load($pdo, 'owner_id', $this->id);
         return $comments;
     }
 

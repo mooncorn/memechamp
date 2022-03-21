@@ -11,10 +11,11 @@ include 'Header.php';
  */
 
 function renderComments(CommentCollection $commentCollection) {
+    global $pdo;
     if (!empty($commentCollection->getComments())) {
         foreach ($commentCollection->getComments() as $comment) {
             $indentationInPx = $commentCollection->getIndentation() * 25;
-            $owner = $comment->getOwner();
+            $owner = $comment->getOwner($pdo);
             $username = $owner->getUsername();
             $createdAt = $comment->getCreatedAt();
             $linkToOwnerProfile = Routing::getCustomUrlTo('profile', ['id' => $comment->getOwnerId()]);
