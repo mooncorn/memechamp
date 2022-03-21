@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use PDO;
 
 class Comment
@@ -15,9 +16,7 @@ class Comment
     private bool $edited;
     private string $created_at;
 
-    private CommentCollection $replies; // an array of comments
-
-    public function __construct(int $indentation = 0)
+    public function __construct()
     {
         $this->id = 0;
         $this->content = "";
@@ -27,68 +26,216 @@ class Comment
         $this->deleted = false;
         $this->edited = false;
         $this->created_at = "";
-        $this->replies = new CommentCollection($indentation);
     }
 
+    /**
+     * Queries the database for a record with specified id and
+     * updates the properties of the class with found data.
+     *
+     * @param PDO $pdo Connection to database
+     * @param int $id The id of database row that needs to be fetched and loaded
+     *
+     * @author David Pilarski
+     * @return Comment|null Returns an instance of Comment if record is found, otherwise returns null.
+     */
     public function load(PDO $pdo, int $id): ?Comment
     {
         $row = $pdo->query("SELECT * FROM comment WHERE id=$id")->fetch();
 
-        if ($row) {
-            $this->id = $row["id"];
-            $this->content = $row["content"];
-            $this->owner_id = $row['owner_id'];
-            $this->reply_to_id = $row["reply_to_id"];
-            $this->post_id = $row["post_id"];
-            $this->deleted = $row['deleted'];
-            $this->edited = $row['edited'];
-            $this->created_at = $row["created_at"];
+        if (!$row) return null;
 
-            // every comment will load its own replies
-            $this->loadReplies($pdo);
-
-            return $this;
-        }
-
-        return null;
+        $this->id = $row["id"];
+        $this->content = $row["content"];
+        $this->owner_id = $row['owner_id'];
+        $this->reply_to_id = $row["reply_to_id"];
+        $this->post_id = $row["post_id"];
+        $this->deleted = $row['deleted'];
+        $this->edited = $row['edited'];
+        $this->created_at = $row["created_at"];
+        return $this;
     }
 
-    public function save(PDO $pdo): ?Comment {
-        // if comment already has an id, update existing comment
-        if ($this->isLoaded()) {
-            $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited='true' WHERE id=?");
-            $stmt->execute([$this->content, $this->deleted, $this->id]);
-        }
-        // if comment does not have an id, insert new comment
-        else {
-            $stmt = $pdo->prepare("INSERT INTO comment (content, reply_to_id, post_id) VALUES (?, ?, ?)");
-            $stmt->execute([$this->content, $this->reply_to_id, $this->post_id]);
-        }
+    /**
+     * Will either save or update current instance of Comment.
+     * If id is present, the method will update an existing record in database.
+     * If id is missing, a new record will be inserted into the database.
+     *
+     * @param PDO $pdo Connection to database
+     *
+     * @author David Pilarski
+     * @return Comment|null Returns an instance of Comment if record is successfully updated or inserted, otherwise returns null.
+     */
+    public function save(PDO $pdo): ?Comment
+    {
+        try
+        {
+            if ($this->id != 0)
+            {
+                $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited='true' WHERE id=?");
+                $stmt->execute([$this->content, $this->deleted, $this->id]);
+            }
+            else
+            {
+                $stmt = $pdo->prepare("INSERT INTO comment (content, reply_to_id, post_id, owner_id) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$this->content, $this->reply_to_id, $this->post_id, $this->owner_id]);
+            }
 
-        if ($this->load($pdo, $this->id)) {
-            return $this;
-        } else {
+            return $this->load($pdo, $this->id);
+        }
+        catch (Exception $e)
+        {
             return null;
         }
     }
 
-    public function isLoaded(): bool {
-        return $this->id != 0;
-    }
-
-    public function loadReplies(PDO $pdo)
+    /**
+     * Queries the database for a list of records that match with the value of foreign key.
+     *
+     * @param PDO $pdo Connection to database
+     * @param string $foreign_key The name of the foreign key in database
+     * @param int $value The value of foreign key
+     *
+     * @return array of Comment objects
+     * @throws Exception If foreign key is not 'reply_to_id', 'post_id' or 'owner_id', an Exception is thrown.
+     * @author David Pilarski
+     */
+    public static function fetchComments(PDO $pdo, string $foreign_key, int $value): array
     {
-        $this->replies->load($pdo, 'reply_to_id', $this->id);
-    }
+        $comments = [];
+        $identifier = strtolower($foreign_key);
 
-    public function getOwner(PDO $pdo): ?User
-    {
-        $owner = new User();
-        if ($owner->load($pdo, 'id', $this->owner_id)) {
-            return $owner;
+        if ($identifier == 'post_id')
+        {
+            $sql = "SELECT id FROM comment WHERE post_id=$value AND reply_to_id IS NULL";
+        }
+        else if ($identifier == 'reply_to_id' || $identifier == 'owner_id')
+        {
+            $sql = "SELECT id FROM comment WHERE $identifier=$value";
+        }
+        else
+        {
+            throw new Exception('Invalid index. Must be reply_to_id, post_id or owner_id.');
         }
 
-        return null;
+        $stmt = $pdo->query($sql);
+
+        while ($row = $stmt->fetch())
+        {
+            $comment = new Comment();
+            $comment->load($pdo, $row['id']);
+            $comments[] = $comment;
+        }
+
+        return $comments;
+    }
+
+    /**
+     * Queries the database for a list of records that match with the value of foreign key, and
+     * fetches the owner for every comment.
+     *
+     * @param PDO $pdo Connection to database
+     * @param string $foreign_key The name of the foreign key in database
+     * @param int $value The value of foreign key
+     *
+     * @return array [[Comment, User], ... ]
+     * @throws Exception If foreign key is not 'reply_to_id', 'post_id' or 'owner_id', an Exception is thrown.
+     * @author David Pilarski
+     */
+    public static function fetchCommentsWithOwner(PDO $pdo, string $foreign_key, int $value): array
+    {
+        $commentsWithOwner = [];
+        $identifier = strtolower($foreign_key);
+
+        if ($identifier == 'post_id')
+        {
+            $sql = "SELECT id FROM comment WHERE post_id=$value AND reply_to_id IS NULL";
+        }
+        else if ($identifier == 'reply_to_id' || $identifier == 'owner_id')
+        {
+            $sql = "SELECT id FROM comment WHERE $identifier=$value";
+        }
+        else
+        {
+            throw new Exception('Invalid index. Must be reply_to_id, post_id or owner_id.');
+        }
+
+        $stmt = $pdo->query($sql);
+
+        while ($row = $stmt->fetch())
+        {
+            $comment = new Comment();
+            $user = new User();
+
+            $comment->load($pdo, $row['id']);
+            $user->load($pdo, 'id', $comment->getOwnerId());
+
+            $commentsWithOwner[] = ['Comment'=>$comment, 'User'=>$user];
+        }
+
+        return $commentsWithOwner;
+    }
+
+    /**
+     * Queries the database for a list of records that match with the value of foreign key.
+     * Fetches the owner and replies for every comment.
+     *
+     * @param PDO $pdo Connection to database
+     * @param string $foreign_key The name of the foreign key in database
+     * @param int $value The value of foreign key
+     *
+     * @return array [[Comment, User, Replies], ... ]
+     * @throws Exception If foreign key is not 'reply_to_id', 'post_id' or 'owner_id', an Exception is thrown.
+     * @author David Pilarski
+     */
+    public static function fetchCommentsWithOwnerAndReplies(PDO $pdo, string $foreign_key, int $value): array
+    {
+        $commentsWithOwnerAndReplies = [];
+        $identifier = strtolower($foreign_key);
+
+        if ($identifier == 'post_id')
+        {
+            $sql = "SELECT id FROM comment WHERE post_id=$value AND reply_to_id IS NULL";
+        }
+        else if ($identifier == 'reply_to_id' || $identifier == 'owner_id')
+        {
+            $sql = "SELECT id FROM comment WHERE $identifier=$value";
+        }
+        else
+        {
+            throw new Exception('Invalid index. Must be reply_to_id, post_id or owner_id.');
+        }
+
+        $stmt = $pdo->query($sql);
+
+        while ($row = $stmt->fetch())
+        {
+            $comment = new Comment();
+            $comment->load($pdo, $row['id']);
+
+            $user = new User();
+            $user->load($pdo, 'id', $comment->getOwnerId());
+
+            $replies = Comment::fetchComments($pdo, 'reply_to_id', $comment->getId());
+
+            $commentsWithOwnerAndReplies[] = ['Comment'=>$comment, 'User'=>$user, 'Replies'=>$replies];
+        }
+
+        return $commentsWithOwnerAndReplies;
+    }
+
+    /**
+     * Queries the database for the owner of the comment.
+     *
+     * @param PDO $pdo Connection to database
+     *
+     * @throws Exception is thrown when invalid uniqueIdentifierName is provided into the load method
+     * @author David Pilarski
+     * @return User|null The owner of the comment
+     */
+    public function fetchOwner(PDO $pdo): ?User
+    {
+        $owner = new User();
+        return $owner->load($pdo, 'id', $this->owner_id);
     }
 
     #region Getters & Setters
@@ -173,22 +320,6 @@ class Comment
     }
 
     /**
-     * @param CommentCollection $replies
-     */
-    public function setReplies(CommentCollection $replies): void
-    {
-        $this->replies = $replies;
-    }
-
-    /**
-     * @return CommentCollection
-     */
-    public function getReplies(): CommentCollection
-    {
-        return $this->replies;
-    }
-
-    /**
      * @return int|null
      */
     public function getOwnerId(): int|null
@@ -235,7 +366,5 @@ class Comment
     {
         $this->edited = $edited;
     }
-
-
     #endregion
 }

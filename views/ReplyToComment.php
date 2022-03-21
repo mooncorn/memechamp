@@ -1,4 +1,5 @@
 <?php
+
 use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\Comment;
@@ -7,11 +8,9 @@ use App\Models\User;
 include 'Header.php';
 
 /**
- * @var array $replies
  * @var Comment $comment
- * @var User $user
- * @var Comment|null $replyToComment
- * @var User|null $replyToUser
+ * @var User $user owner of the comment
+ * @var array $errors
  */
 
 function renderComments(array $comments) {
@@ -22,14 +21,26 @@ function renderComments(array $comments) {
         ?>
         <li class="list-group-item">
             <div class="d-flex">
-                <h5><a href="<?= Routing::getCustomUrlTo('profile', ['id'=>$user->getId()]) ?>"><?= $user->getUsername() ?></a></h5>
+                <h5>
+                    <?php if ($comment->isDeleted()) { ?>
+                        <a href="#">[deleted]</a>
+                    <?php } else { ?>
+                        <a href="<?= Routing::getCustomUrlTo('profile', ['id'=>$user->getId()]) ?>"><?= $user->getUsername() ?></a>
+                    <?php } ?>
+                </h5>
                 <small class="p-1"><?= $comment->getCreatedAt() ?></small>
                 <?php if ($comment->isEdited()) { ?>
                     <small class="p-1">[edited]</small>
                 <?php } ?>
             </div>
 
-            <p><?= $comment->getContent() ?></p>
+            <?php if ($comment->isDeleted()) { ?>
+                <p>[deleted]</p>
+            <?php } else { ?>
+                <p><?= $comment->getContent() ?></p>
+            <?php } ?>
+
+
             <div class="d-flex align-items-center">
                 <div class="me-2">X Likes</div>
                 <a href="#" class="me-2"><i class="far fa-heart me-1"></i></a>
@@ -55,27 +66,15 @@ function renderComments(array $comments) {
 
 <section class="mx-auto">
 
-    <p>
-        <?php if (isset($replyToComment)) { ?>
-            <?php if ($replyToComment->isDeleted()) { ?>
-                <a href="<?= Routing::getCustomUrlTo('comments', ['id'=>$replyToComment->getId()]) ?>"><i class="fas fa-chevron-left me-2"></i>Replying to [deleted]</a>
-            <?php } else { ?>
-                <a href="<?= Routing::getCustomUrlTo('comments', ['id'=>$replyToComment->getId()]) ?>"><i class="fas fa-chevron-left me-2"></i>Replying to <?= $replyToUser->getUsername() ?></a>
-            <?php } ?>
-        <?php } else { ?>
-            <a href="<?= Routing::getCustomUrlTo('post_comments', ['id'=>$comment->getPostId()]) ?>"><i class="fas fa-chevron-left me-2"></i>Replying to post</a>
-        <?php } ?>
-    </p>
-
     <div class="card">
         <div class="card-header">
             <div class="d-flex">
                 <h5>
-                <?php if ($comment->isDeleted()) { ?>
-                    <a href="#">[deleted]</a>
-                <?php } else { ?>
-                    <a href="<?= Routing::getCustomUrlTo('profile', ['id'=>$user->getId()]) ?>"><?= $user->getUsername() ?></a>
-                <?php } ?>
+                    <?php if ($comment->isDeleted()) { ?>
+                        <a href="#">[deleted]</a>
+                    <?php } else { ?>
+                        <a href="<?= Routing::getCustomUrlTo('profile', ['id'=>$user->getId()]) ?>"><?= $user->getUsername() ?></a>
+                    <?php } ?>
                 </h5>
 
 
@@ -95,14 +94,20 @@ function renderComments(array $comments) {
             <div class="d-flex align-items-center">
                 <div class="me-2">X Likes</div>
                 <a href="#" class="me-2"><i class="far fa-heart me-1"></i></a>
-                <a href="<?= Routing::getCustomUrlTo('reply_to_comment', ['id'=>$comment->getId()]) ?>" class="me-2"><i class="far fa-comment-alt me-1"></i></a>
             </div>
         </div>
 
 
-        <ul class="list-group list-group-flush">
-            <?php renderComments($replies); ?>
-        </ul>
+        <div class="card-body">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="content" class="form-label">Message</label>
+                    <textarea type="text" name="content" class="form-control" value="<?= $username ?? '' ?>"></textarea>
+                    <div class="text-danger"><?= $errors["content"] ?? "" ?></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Reply</button>
+            </form>
+        </div>
     </div>
 
 </section>
