@@ -32,82 +32,112 @@ class User {
     }
 
     /**
-     * @throws Exception
+     * Queries the database for a record with specified uniqueIdentifierName and
+     * updates the properties of the class with found data.
+     *
+     * @param PDO $pdo Connection to database
+     * @param string $uniqueIdentifierName The name of column in database
+     * @param int|string $value The value of specified column in database
+     *
+     * @throws Exception If uniqueIdentifierName is not 'id', 'username' or 'email', an Exception is thrown.
+     * @author David Pilarski
+     * @return User|null Returns an instance of User if record is found, otherwise returns null.
      */
     public function load(PDO $pdo, string $uniqueIdentifierName, int|string $value): ?User {
         $identifier = strtolower($uniqueIdentifierName);
 
-        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email') {
+        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email')
+        {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
 
-        $stmt = $pdo->query("SELECT * FROM user WHERE $identifier='$value'");
-        $row = $stmt->fetch();
+        $row = $pdo->query("SELECT * FROM user WHERE $identifier='$value'")->fetch();
 
-        if ($row) {
-          $this->id = $row["id"];
-          $this->email = $row["email"];
-          $this->username = $row["username"];
-          $this->password = $row["password"];
-          $this->pfp = $row["pfp"];
-          $this->current_poggers = $row["current_poggers"];
-          $this->max_poggers = $row["max_poggers"];
-          $this->is_banned = $row["is_banned"];
-          $this->is_admin = $row["is_admin"];
-          $this->created_at = $row["created_at"];
+        if (!$row) return null;
 
-          return $this;
-        }
-
-        return null;
+        $this->id = $row["id"];
+        $this->email = $row["email"];
+        $this->username = $row["username"];
+        $this->password = $row["password"];
+        $this->pfp = $row["pfp"];
+        $this->current_poggers = $row["current_poggers"];
+        $this->max_poggers = $row["max_poggers"];
+        $this->is_banned = $row["is_banned"];
+        $this->is_admin = $row["is_admin"];
+        $this->created_at = $row["created_at"];
+        return $this;
     }
 
+    /**
+     * Will either save or update current instance of User.
+     * If id is present, the method will update an existing record in database.
+     * If id is missing, a new record will be inserted into the database.
+     *
+     * @param PDO $pdo Connection to database
+     *
+     * @author David Pilarski
+     * @return User|null Returns an instance of User if record is successfully updated or inserted, otherwise returns null.
+     */
     public function save(PDO $pdo): ?User {
-        // if user already has an id, update existing user
-        if ($this->isLoaded()) {
-            $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, current_poggers=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
-            $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->current_poggers, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
-        }
-        // if user does not have an id, insert new user
-        else {
-            $stmt = $pdo->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
-            $stmt->execute([$this->username, $this->email, $this->password]);
-        }
+        try
+        {
+            if ($this->id != 0)
+            {
+                $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, current_poggers=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
+                $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->current_poggers, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
+            }
+            else
+            {
+                $stmt = $pdo->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
+                $stmt->execute([$this->username, $this->email, $this->password]);
+            }
 
-        if ($this->load($pdo, "username", $this->username)) {
-            return $this;
+            return $this->load($pdo, "username", $this->username);
         }
-
-        return null;
+        catch (Exception $e)
+        {
+            return null;
+        }
     }
 
+    /**
+     * Will check whether a records already exists in database.
+     *
+     * @param PDO $pdo Connection to database
+     * @param string $uniqueIdentifierName The name of column in database
+     * @param int|string $value The value of specified column in database
+     *
+     * @throws Exception is thrown when uniqueIdentifierName is invalid. Needs to be 'id', 'username' or 'email'.
+     * @author David Pilarski
+     * @return bool True if found, False if not found
+     */
     public static function exists(PDO $pdo, string $uniqueIdentifierName, int|string $value): bool {
         $identifier = strtolower($uniqueIdentifierName);
 
-        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email') {
+        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email')
+        {
             throw new Exception('Invalid identifier. Must be id, username or email.');
         }
 
-        $stmt = $pdo->query("SELECT * FROM user WHERE $identifier='$value'");
-        $row = $stmt->fetch();
-
-        if ($row) {
-            return true;
-        }
-
-        return false;
+        return (bool) $pdo->query("SELECT * FROM user WHERE $identifier='$value'")->fetch();
     }
 
+    /**
+     * Will build a new instance of User
+     *
+     * @param string $username Username of new user
+     * @param string $email Email of new user
+     * @param string $password Password of new user
+     *
+     * @author David Pilarski
+     * @return User Instance of new user
+     */
     public static function build(string $username, string $email, string $password): User {
         $user = new User();
         $user->setUsername($username);
         $user->setEmail($email);
         $user->setPassword($password);
         return $user;
-    }
-
-    public function isLoaded(): bool {
-        return $this->id != 0;
     }
 
     #region Getters & Setters
@@ -186,13 +216,9 @@ class User {
     /**
      * @param string $pfp
      */
-    public function setPfp(string|null $pfp): void
+    public function setPfp(string $pfp): void
     {
-        if ($pfp) {
-            $this->pfp = $pfp;
-        } else {
-            $this->pfp = "";
-        }
+        $this->pfp = $pfp;
     }
 
     /**
@@ -230,25 +256,9 @@ class User {
     /**
      * @return bool
      */
-    public function isBanned(): bool
+    public function isIsBanned(): bool
     {
         return $this->is_banned;
-    }
-
-    /**
-     * @param bool $is_admin
-     */
-    public function setIsAdmin(bool $is_admin): void
-    {
-        $this->is_admin = $is_admin;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getIsAdmin(): bool
-    {
-        return $this->is_admin;
     }
 
     /**
@@ -260,6 +270,22 @@ class User {
     }
 
     /**
+     * @return bool
+     */
+    public function isIsAdmin(): bool
+    {
+        return $this->is_admin;
+    }
+
+    /**
+     * @param bool $is_admin
+     */
+    public function setIsAdmin(bool $is_admin): void
+    {
+        $this->is_admin = $is_admin;
+    }
+
+    /**
      * @return string
      */
     public function getCreatedAt(): string
@@ -268,14 +294,11 @@ class User {
     }
 
     /**
-     * @return CommentCollection
+     * @param string $created_at
      */
-    public function getCommentCollection($pdo): CommentCollection
+    public function setCreatedAt(string $created_at): void
     {
-        $comments = new CommentCollection();
-        $comments->load($pdo, 'owner_id', $this->id);
-        return $comments;
+        $this->created_at = $created_at;
     }
-
     #endregion
 }

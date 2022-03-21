@@ -18,10 +18,11 @@ use App\Helpers\Routing;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" type="image/x-icon" href="<?='/'.constant('URL_SUBFOLDER').'/public/images/icon.png'?>">
-    <link rel="stylesheet" href="<?=constant('URL_SUBFOLDER').'/public/css/style.css'?>">
+    <link rel="icon" type="image/x-icon" href="<?= '/' . constant('URL_SUBFOLDER').'/public/images/icon.png'?>">
     <title>MemeChamp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?= '/' . constant('URL_SUBFOLDER').'/public/css/style.css'?>">
+    <script src="https://kit.fontawesome.com/e74decf3a7.js" crossorigin="anonymous"></script>
 </head>
 <body>
 

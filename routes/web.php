@@ -56,15 +56,39 @@ $routes->add('edit_profile', new Route(
     array('id' => '[0-9]+')
 ));
 
-$routes->add('comments', new Route(
+$routes->add('post_comments', new Route(
     constant('URL_SUBFOLDER') . '/post/{id}/comments',
     array('controller' => 'PageController', 'method'=>'comments'),
+    array('id' => '[0-9]+')
+));
+
+$routes->add('comments', new Route(
+    constant('URL_SUBFOLDER') . '/comment/{id}',
+    array('controller' => 'CommentController', 'method'=>'comments'),
     array('id' => '[0-9]+')
 ));
 
 $routes->add('delete_comment', new Route(
     constant('URL_SUBFOLDER') . '/comment/{id}/delete',
     array('controller' => 'CommentController', 'method'=>'deleteOne'),
+    array('id' => '[0-9]+')
+));
+
+$routes->add('reply_to_comment', new Route(
+    constant('URL_SUBFOLDER') . '/comment/{id}/reply',
+    array('controller' => 'CommentController', 'method'=>'replyToComment'),
+    array('id' => '[0-9]+')
+));
+
+$routes->add('reply_to_post', new Route(
+    constant('URL_SUBFOLDER') . '/post/{id}/comment',
+    array('controller' => 'CommentController', 'method'=>'replyToPost'),
+    array('id' => '[0-9]+')
+));
+
+$routes->add('edit_comment', new Route(
+    constant('URL_SUBFOLDER') . '/comment/{id}/delete',
+    array('controller' => 'CommentController', 'method'=>'editComment'),
     array('id' => '[0-9]+')
 ));
 
