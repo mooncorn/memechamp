@@ -11,6 +11,7 @@ include 'Header.php';
  * @var Routing
  * @var User $user
  * @var string $tab
+ * @var array $comments
  */
 
 function renderComments(array $comments) {
@@ -95,7 +96,7 @@ function renderComments(array $comments) {
 
         <?php
             if ($tab == 'comments') {
-                renderComments($user->getCommentCollection()->getComments());
+                renderComments($comments);
             }
         ?>
 

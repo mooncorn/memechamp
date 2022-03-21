@@ -10,10 +10,16 @@ class UserController
 {
     // Show user attributes based on the id provided in the url
 	public function profile(int $id, string $tab) {
-        $user = new User();
-        $user->load('id', $id);
+        global $pdo;
 
-        if ($user->load('id', $id)) {
+        $user = new User();
+
+        if ($user->load($pdo, 'id', $id)) {
+
+            if ($tab == "comments") {
+                $comments = $user->getCommentCollection($pdo)->getComments();
+            }
+
             require_once APP_ROOT . '/views/Profile.php';
         } else {
             require_once APP_ROOT . '/views/404.php';
@@ -21,6 +27,7 @@ class UserController
 	}
 
     public function signup() {
+        global $pdo;
         $errors = array();
 
         if (!empty($_POST)) {
@@ -41,18 +48,18 @@ class UserController
 
             // check unique fields
             if (!isset($errors['email'])) {
-                if (User::exists('email', $email)) {
+                if (User::exists($pdo, 'email', $email)) {
                     $errors['email'] = 'Email is taken';
                 }
             }
             if (!isset($errors['username'])) {
-                if (User::exists('username', $username)) {
+                if (User::exists($pdo, 'username', $username)) {
                     $errors['username'] = "Username is taken";
                 }
             }
 
             if (empty($errors)) {
-                $user = User::build($username, $email, $password)->save();
+                $user = User::build($username, $email, $password)->save($pdo);
 
                 // add user info to the current session
                 Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
@@ -67,6 +74,7 @@ class UserController
 
     public function signin()
     {
+        global $pdo;
         $errors = array();
 
         if (!empty($_POST)) {
@@ -83,7 +91,7 @@ class UserController
 
             if (empty($errors)) {
                 $user = new User();
-                $user->load('username', $username);
+                $user->load($pdo, 'username', $username);
 
                 // if user with provided username was found
                 if ($user->isLoaded()) {
@@ -114,6 +122,7 @@ class UserController
     }
 
     public function edit_profile(int $id) {
+        global $pdo;
         $errors = array();
         $messages = array();
 
@@ -121,7 +130,7 @@ class UserController
         if (Auth::isOwner($id)) {
 
             $user = new User();
-            $user->load('id', $id);
+            $user->load($pdo, 'id', $id);
 
             // handle username update
             if (isset($_POST['username'])) {
@@ -130,9 +139,9 @@ class UserController
                 // check if username passed filter
                 if ($username) {
                     // check if username is unique
-                    if (!User::exists('username', $username)) {
+                    if (!User::exists($pdo, 'username', $username)) {
                         $user->setUsername($username);
-                        $user->save();
+                        $user->save($pdo);
 
                         Auth::setSession(['username' => $username]);
 
@@ -165,7 +174,7 @@ class UserController
                         if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath)){
                             // Insert image file name into database
                             $user->setPfp($newFileName);
-                            $user->save();
+                            $user->save($pdo);
                             $messages['pfp'] = 'Profile picture updated successfully';
                         }
                     } else {
