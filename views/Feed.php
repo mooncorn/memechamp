@@ -16,6 +16,6 @@ include 'Header.php';
 
     <section>
         <h1>Homepage</h1>
-        <a href="<?= Routing::getCustomUrlTo('post_comments', ['id' => 1]) ?>">Go to Post 1</a>
+        <a href="<?= Routing::getCustomUrlTo('comments', ['id' => 1]) ?>">Go to Post 1</a>
     <section>
 <?php include 'Footer.php'; ?>

@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\DBConnection;
+use App\Models\Enums\GetUserBy;
 use Exception;
-use PDO;
 
 class User {
     private int $id;
@@ -31,27 +32,10 @@ class User {
         $this->created_at = "";
     }
 
-    /**
-     * Queries the database for a record with specified uniqueIdentifierName and
-     * updates the properties of the class with found data.
-     *
-     * @param PDO $pdo Connection to database
-     * @param string $uniqueIdentifierName The name of column in database
-     * @param int|string $value The value of specified column in database
-     *
-     * @throws Exception If uniqueIdentifierName is not 'id', 'username' or 'email', an Exception is thrown.
-     * @author David Pilarski
-     * @return User|null Returns an instance of User if record is found, otherwise returns null.
-     */
-    public function load(PDO $pdo, string $uniqueIdentifierName, int|string $value): ?User {
-        $identifier = strtolower($uniqueIdentifierName);
-
-        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email')
-        {
-            throw new Exception('Invalid identifier. Must be id, username or email.');
-        }
-
-        $row = $pdo->query("SELECT * FROM user WHERE $identifier='$value'")->fetch();
+    public function load(GetUserBy $column, int|string $value): ?User
+    {
+        $pdo = DBConnection::getDB();
+        $row = $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
 
         if (!$row) return null;
 
@@ -68,17 +52,9 @@ class User {
         return $this;
     }
 
-    /**
-     * Will either save or update current instance of User.
-     * If id is present, the method will update an existing record in database.
-     * If id is missing, a new record will be inserted into the database.
-     *
-     * @param PDO $pdo Connection to database
-     *
-     * @author David Pilarski
-     * @return User|null Returns an instance of User if record is successfully updated or inserted, otherwise returns null.
-     */
-    public function save(PDO $pdo): ?User {
+    public function save(): ?User
+    {
+        $pdo = DBConnection::getDB();
         try
         {
             if ($this->id != 0)
@@ -100,39 +76,12 @@ class User {
         }
     }
 
-    /**
-     * Will check whether a records already exists in database.
-     *
-     * @param PDO $pdo Connection to database
-     * @param string $uniqueIdentifierName The name of column in database
-     * @param int|string $value The value of specified column in database
-     *
-     * @throws Exception is thrown when uniqueIdentifierName is invalid. Needs to be 'id', 'username' or 'email'.
-     * @author David Pilarski
-     * @return bool True if found, False if not found
-     */
-    public static function exists(PDO $pdo, string $uniqueIdentifierName, int|string $value): bool
+    public static function exists(GetUserBy $column, int|string $value): bool
     {
-        $identifier = strtolower($uniqueIdentifierName);
-
-        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email')
-        {
-            throw new Exception('Invalid identifier. Must be id, username or email.');
-        }
-
-        return (bool) $pdo->query("SELECT * FROM user WHERE $identifier='$value'")->fetch();
+        $pdo = DBConnection::getDB();
+        return (bool) $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
     }
 
-    /**
-     * Will build a new instance of User
-     *
-     * @param string $username Username of new user
-     * @param string $email Email of new user
-     * @param string $password Password of new user
-     *
-     * @author David Pilarski
-     * @return User Instance of new user
-     */
     public static function build(string $username, string $email, string $password): User
     {
         $user = new User();
@@ -142,10 +91,23 @@ class User {
         return $user;
     }
 
-    public static function fetch(PDO $pdo, int $id): ?User
+    public static function fetch(int $id): ?User
     {
         $user = new User();
-        return $user->load($pdo, 'id', $id);
+        return $user->load(GetUserBy::ID, $id);
+    }
+
+    public function getComments(): array
+    {
+        $pdo = DBConnection::getDB();
+        $comments = [];
+        $stmt = $pdo->query("SELECT * FROM comment WHERE owner_id=$this->id");
+
+        while ($row = $stmt->fetch()) {
+            $comments[] = Comment::parseToObject($row);
+        }
+
+        return $comments;
     }
 
     #region Getters & Setters

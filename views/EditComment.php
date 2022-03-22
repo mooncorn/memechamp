@@ -1,8 +1,5 @@
 <?php
 
-use App\Helpers\Auth;
-use App\Helpers\Routing;
-
 include 'Header.php';
 
 /**

@@ -5,20 +5,20 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\Comment;
+use App\Models\Enums\GetUserBy;
 use App\Models\User;
 
 class UserController
 {
 	public function profile(int $id, string $tab)
     {
-        global $pdo;
-        $user = new User();
+        $user = User::fetch($id);
 
-        if ($user->load($pdo, 'id', $id))
+        if ($user)
         {
             if ($tab == "comments")
             {
-                $comments = Comment::fetchComments($pdo, 'owner_id', $id);
+                $comments = $user->getComments();
             }
 
             require_once APP_ROOT . '/views/Profile.php';
@@ -31,7 +31,6 @@ class UserController
 
     public function signup()
     {
-        global $pdo;
         $errors = array();
 
         if (!empty($_POST))
@@ -57,14 +56,14 @@ class UserController
             // check unique fields
             if (!isset($errors['email']))
             {
-                if (User::exists($pdo, 'email', $email))
+                if (User::exists(GetUserBy::EMAIL, $email))
                 {
                     $errors['email'] = 'Email is taken';
                 }
             }
             if (!isset($errors['username']))
             {
-                if (User::exists($pdo, 'username', $username))
+                if (User::exists(GetUserBy::USERNAME, $username))
                 {
                     $errors['username'] = "Username is taken";
                 }
@@ -72,7 +71,7 @@ class UserController
 
             if (empty($errors))
             {
-                $user = User::build($username, $email, $password)->save($pdo);
+                $user = User::build($username, $email, $password)->save();
 
                 // add user info to the current session
                 Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
@@ -87,7 +86,6 @@ class UserController
 
     public function signin()
     {
-        global $pdo;
         $errors = array();
 
         if (!empty($_POST))
@@ -110,7 +108,7 @@ class UserController
                 $user = new User();
 
                 // if user with provided username was found
-                if ($user->load($pdo, 'username', $username))
+                if ($user->load(GetUserBy::USERNAME, $username))
                 {
                     // verify if the passwords match
                     if ($user->getPassword() == $password)
@@ -145,16 +143,13 @@ class UserController
 
     public function edit_profile(int $id)
     {
-        global $pdo;
         $errors = array();
         $messages = array();
 
         // handle username update only if current user has permission
         if (Auth::isOwner($id))
         {
-
-            $user = new User();
-            $user->load($pdo, 'id', $id);
+            $user = User::fetch($id);
 
             // handle username update
             if (isset($_POST['username']))
@@ -165,10 +160,10 @@ class UserController
                 if ($username)
                 {
                     // check if username is unique
-                    if (!User::exists($pdo, 'username', $username))
+                    if (!User::exists(GetUserBy::USERNAME, $username))
                     {
                         $user->setUsername($username);
-                        $user->save($pdo);
+                        $user->save();
 
                         Auth::setSession(['username' => $username]);
 
@@ -209,7 +204,7 @@ class UserController
                         {
                             // Insert image file name into database
                             $user->setPfp($newFileName);
-                            $user->save($pdo);
+                            $user->save();
                             $messages['pfp'] = 'Profile picture updated successfully';
                         }
                     }
