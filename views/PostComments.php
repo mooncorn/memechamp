@@ -2,6 +2,7 @@
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
+use App\Models\Like;
 
 include 'Header.php';
 
@@ -11,10 +12,10 @@ include 'Header.php';
  */
 
 function renderComments(array $comments) {
-    foreach ($comments as $commentWithOwnerAndReplies) {
-        $comment = $commentWithOwnerAndReplies['Comment'];
-        $user = $commentWithOwnerAndReplies['User'];
-        $replies = $commentWithOwnerAndReplies['Replies'];
+    foreach ($comments as $commentWithAll) {
+        $comment = $commentWithAll['Comment'];
+        $user = $commentWithAll['User'];
+        $replies = $commentWithAll['Replies'];
         ?>
             <li class="list-group-item">
                 <div class="d-flex justify-content-between">
@@ -47,9 +48,8 @@ function renderComments(array $comments) {
                 <?php } ?>
 
                 <div class="d-flex align-items-center">
-                    <div class="me-2">X Likes</div>
-                    <a href="#" class="me-2"><i class="far fa-heart me-1"></i></a>
-                    <a href="<?= Routing::getCustomUrlTo('reply_to_comment', ['id'=>$comment->getId()]) ?>" class="me-2"><i class="far fa-comment-alt me-1"></i></a>
+                    <div class="me-2"><?= $commentWithAll['Likes'] ?> Likes</div>
+                    <a href="<?= Routing::getCustomUrlTo('reply_to_comment', ['id'=>$comment->getId()]) ?>" class="me-2"><i class="far fa-comment-alt me-1"></i>Reply</a>
                     <a href="<?= Routing::getCustomUrlTo('comments', ['id'=>$comment->getId()]) ?>"><i class="far fa-comments me-1"></i><?= count($replies) ?></a>
                 </div>
             </li>

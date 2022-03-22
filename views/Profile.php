@@ -22,8 +22,8 @@ function renderComments(array $comments) {
 
     echo "<ul class='list-group mt-3'>";
     foreach ($comments as $comment) {
-        if (!$comment->isDeleted()) {
-            $content = $comment->getContent();
+        if (!$comment["Comment"]->isDeleted()) {
+            $content = $comment["Comment"]->getContent();
             echo "<li class='list-group-item'>$content</li>";
         }
     }

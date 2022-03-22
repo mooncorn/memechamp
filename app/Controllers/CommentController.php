@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\Comment;
+use App\Models\Like;
 use App\Models\User;
 
 class CommentController
@@ -42,10 +43,12 @@ class CommentController
         $comment = new Comment();
         if ($comment->load($pdo, $id))
         {
+            $likes = Like::getNumberOfLikesForComment($pdo, $comment->getId());
+
             $user = new User();
             $user->load($pdo, 'id', $comment->getOwnerId());
 
-            $replies = Comment::fetchCommentsWithOwnerAndReplies($pdo, 'reply_to_id', $id);
+            $replies = Comment::fetchCommentsAll($pdo, 'reply_to_id', $id);
 
             if ($comment->getReplyToId())
             {
@@ -182,5 +185,27 @@ class CommentController
         }
         
         require_once APP_ROOT . '/views/EditComment.php';
+    }
+
+    public function likeComment(int $id)
+    {
+        global $pdo;
+
+        if (!Auth::isAuthenticated())
+        {
+            Routing::redirectToPage('signin');
+            return;
+        }
+
+        if (Like::exists($pdo, Auth::get('id'), $id))
+        {
+            Like::delete($pdo, Auth::get('id'), $id);
+        }
+        else
+        {
+            Like::create($pdo, Auth::get('id'), $id);
+        }
+
+        Routing::redirectToCustomPage('comments', ['id'=>$id]);
     }
 }
