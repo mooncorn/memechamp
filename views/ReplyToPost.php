@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\Auth;
 use App\Helpers\Routing;
 
 include 'Header.php';
@@ -23,7 +22,7 @@ include 'Header.php';
 
 <section class="mx-auto">
 
-    <h1><a href="<?= Routing::getCustomUrlTo('post_comments', ['id'=>$id]) ?>">Post <?=$id?></a></h1>
+    <h1><a href="<?= Routing::getCustomUrlTo('comments', ['id'=>$id]) ?>">Post <?=$id?></a></h1>
 
     <div class="card">
         <div class="card-header">

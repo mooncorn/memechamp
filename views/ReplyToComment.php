@@ -78,24 +78,17 @@ function renderComments(array $comments) {
                     <?php } ?>
                 </h5>
 
-
                 <small class="p-1"><?= $comment->getCreatedAt() ?></small>
                 <?php if ($comment->isEdited()) { ?>
                     <small class="p-1">[edited]</small>
                 <?php } ?>
             </div>
 
-
             <?php if ($comment->isDeleted()) { ?>
                 <p>[deleted]</p>
             <?php } else { ?>
                 <p><?= $comment->getContent() ?></p>
             <?php } ?>
-
-            <div class="d-flex align-items-center">
-                <div class="me-2">X Likes</div>
-                <a href="#" class="me-2"><i class="far fa-heart me-1"></i></a>
-            </div>
         </div>
 
 

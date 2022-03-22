@@ -56,14 +56,8 @@ $routes->add('edit_profile', new Route(
     array('id' => '[0-9]+')
 ));
 
-$routes->add('post_comments', new Route(
-    constant('URL_SUBFOLDER') . '/post/{id}/comments',
-    array('controller' => 'PageController', 'method'=>'comments'),
-    array('id' => '[0-9]+')
-));
-
 $routes->add('comments', new Route(
-    constant('URL_SUBFOLDER') . '/comment/{id}',
+    constant('URL_SUBFOLDER') . '/post/{id}/comments',
     array('controller' => 'CommentController', 'method'=>'comments'),
     array('id' => '[0-9]+')
 ));
@@ -81,7 +75,7 @@ $routes->add('reply_to_comment', new Route(
 ));
 
 $routes->add('reply_to_post', new Route(
-    constant('URL_SUBFOLDER') . '/post/{id}/comment',
+    constant('URL_SUBFOLDER') . '/post/{id}/comments/create',
     array('controller' => 'CommentController', 'method'=>'replyToPost'),
     array('id' => '[0-9]+')
 ));

@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\DBConnection;
+use App\Models\Enums\ReplyTarget;
 use Exception;
-use PDO;
 
 class Comment
 {
@@ -28,18 +29,9 @@ class Comment
         $this->created_at = "";
     }
 
-    /**
-     * Queries the database for a record with specified id and
-     * updates the properties of the class with found data.
-     *
-     * @param PDO $pdo Connection to database
-     * @param int $id The id of database row that needs to be fetched and loaded
-     *
-     * @author David Pilarski
-     * @return Comment|null Returns an instance of Comment if record is found, otherwise returns null.
-     */
-    public function load(PDO $pdo, int $id): ?Comment
+    public function load(int $id): ?Comment
     {
+        $pdo = DBConnection::getDB();
         $row = $pdo->query("SELECT * FROM comment WHERE id=$id")->fetch();
 
         if (!$row) return null;
@@ -55,18 +47,9 @@ class Comment
         return $this;
     }
 
-    /**
-     * Will either save or update current instance of Comment.
-     * If id is present, the method will update an existing record in database.
-     * If id is missing, a new record will be inserted into the database.
-     *
-     * @param PDO $pdo Connection to database
-     *
-     * @author David Pilarski
-     * @return Comment|null Returns an instance of Comment if record is successfully updated or inserted, otherwise returns null.
-     */
-    public function save(PDO $pdo): ?Comment
+    public function save(): ?Comment
     {
+        $pdo = DBConnection::getDB();
         try
         {
             if ($this->id != 0)
@@ -80,7 +63,7 @@ class Comment
                 $stmt->execute([$this->content, $this->reply_to_id, $this->post_id, $this->owner_id]);
             }
 
-            return $this->load($pdo, $this->id);
+            return $this->load($this->id);
         }
         catch (Exception $e)
         {
@@ -88,111 +71,77 @@ class Comment
         }
     }
 
-    /**
-     * Queries the database for a list of records that match with the value of foreign key.
-     *
-     * @param PDO $pdo Connection to database
-     * @param string $foreign_key The name of the foreign key in database
-     * @param int $value The value of foreign key
-     *
-     * @return array of Comment objects [['Comment', 'Likes'], ... ]
-     * @throws Exception If foreign key is not 'reply_to_id', 'post_id' or 'owner_id', an Exception is thrown.
-     * @author David Pilarski
-     */
-    public static function fetchComments(PDO $pdo, string $foreign_key, int $value): array
+    public static function getReplies(int $id, ReplyTarget $target = ReplyTarget::COMMENT): array
     {
+        $pdo = DBConnection::getDB();
         $comments = [];
-        $identifier = strtolower($foreign_key);
 
-        if ($identifier == 'post_id')
-        {
-            $sql = "SELECT id FROM comment WHERE post_id=$value AND reply_to_id IS NULL";
+        if ($target == ReplyTarget::POST) {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE post_id=$id AND reply_to_id IS NULL");
+        } else {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE reply_to_id=$id");
         }
-        else if ($identifier == 'reply_to_id' || $identifier == 'owner_id')
-        {
-            $sql = "SELECT id FROM comment WHERE $identifier=$value";
-        }
-        else
-        {
-            throw new Exception('Invalid index. Must be reply_to_id, post_id or owner_id.');
-        }
-
-        $stmt = $pdo->query($sql);
 
         while ($row = $stmt->fetch())
         {
-            $comment = new Comment();
-            $comment->load($pdo, $row['id']);
-            $likes = Like::getNumberOfLikesForComment($pdo, $comment->getId());
-            $comments[] = ['Comment'=>$comment, 'Likes'=>$likes];
+            $comments[] = Comment::parseToObject($row);
         }
 
         return $comments;
     }
 
-    /**
-     * Queries the database for a list of records that match with the value of foreign key.
-     * Fetches the owner and replies for every comment.
-     *
-     * @param PDO $pdo Connection to database
-     * @param string $foreign_key The name of the foreign key in database
-     * @param int $value The value of foreign key
-     *
-     * @return array [[Comment, User, Replies, Likes], ... ]
-     * @throws Exception If foreign key is not 'reply_to_id', 'post_id' or 'owner_id', an Exception is thrown.
-     * @author David Pilarski
-     */
-    public static function fetchCommentsAll(PDO $pdo, string $foreign_key, int $value): array
+    public static function getCount(int $id, ReplyTarget $target = ReplyTarget::COMMENT): int
     {
-        $comments = [];
-        $identifier = strtolower($foreign_key);
+        $pdo = DBConnection::getDB();
 
-        if ($identifier == 'post_id')
-        {
-            $sql = "SELECT id FROM comment WHERE post_id=$value AND reply_to_id IS NULL";
-        }
-        else if ($identifier == 'reply_to_id' || $identifier == 'owner_id')
-        {
-            $sql = "SELECT id FROM comment WHERE $identifier=$value";
-        }
-        else
-        {
-            throw new Exception('Invalid index. Must be reply_to_id, post_id or owner_id.');
+        if ($target == ReplyTarget::POST) {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE post_id=$id");
+        } else {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE reply_to_id=$id");
         }
 
-        $stmt = $pdo->query($sql);
-
-        while ($row = $stmt->fetch())
-        {
-            $comment = new Comment();
-            $comment->load($pdo, $row['id']);
-
-            $user = new User();
-            $user->load($pdo, 'id', $comment->getOwnerId());
-
-            $replies = Comment::fetchComments($pdo, 'reply_to_id', $comment->getId());
-
-            $likes = Like::getNumberOfLikesForComment($pdo, $comment->getId());
-
-            $comments[] = ['Comment'=>$comment, 'User'=>$user, 'Replies'=>$replies, 'Likes'=>$likes];
-        }
-
-        return $comments;
+        return count($stmt->fetchAll());
     }
 
-    /**
-     * Queries the database for the owner of the comment.
-     *
-     * @param PDO $pdo Connection to database
-     *
-     * @throws Exception is thrown when invalid uniqueIdentifierName is provided into the load method
-     * @author David Pilarski
-     * @return User|null The owner of the comment
-     */
-    public function fetchOwner(PDO $pdo): ?User
+    public static function parseToObject($row): Comment
     {
-        $owner = new User();
-        return $owner->load($pdo, 'id', $this->owner_id);
+        $comment = new Comment();
+        $comment->setId($row['id']);
+        $comment->setContent($row['content']);
+        $comment->setOwnerId($row['owner_id']);
+        $comment->setReplyToId($row['reply_to_id']);
+        $comment->setPostId($row['post_id']);
+        $comment->setDeleted($row['deleted']);
+        $comment->setEdited($row['edited']);
+        $comment->setCreatedAt($row['created_at']);
+        return $comment;
+    }
+
+    public function getOwner(): ?User
+    {
+        return User::fetch($this->owner_id);
+    }
+
+    public static function fetch(int $id): ?Comment
+    {
+        $comment = new Comment();
+        return $comment->load($id);
+    }
+
+    public static function build(string $content, $post_id, $owner_id, $reply_to_id = null): Comment
+    {
+        $comment = new Comment();
+        $comment->setContent($content);
+        $comment->setPostId($post_id);
+        $comment->setOwnerId($owner_id);
+        $comment->setReplyToId($reply_to_id);
+        return $comment;
+    }
+
+    public function getLikes(): int
+    {
+        $pdo = DBConnection::getDB();
+        return count($pdo->query("SELECT id FROM comment_like WHERE comment_id = $this->id")->fetchAll());
     }
 
     #region Getters & Setters
