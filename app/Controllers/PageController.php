@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Comment;
+use App\Models\CommentForeignKey;
 
 class PageController
 {
@@ -14,7 +15,15 @@ class PageController
     public function comments(int $id)
     {
         global $pdo;
-        $comments = Comment::fetchCommentsAll($pdo, 'post_id', 1);
+
+        $comments = Comment::fetchComments($pdo, CommentForeignKey::POST_ID, $id);
+
+
+        echo "<pre>";
+        print_r($comments);
+        echo "</pre>";
+
+
         require_once APP_ROOT . '/views/PostComments.php';
     }
 }

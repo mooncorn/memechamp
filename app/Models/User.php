@@ -111,7 +111,8 @@ class User {
      * @author David Pilarski
      * @return bool True if found, False if not found
      */
-    public static function exists(PDO $pdo, string $uniqueIdentifierName, int|string $value): bool {
+    public static function exists(PDO $pdo, string $uniqueIdentifierName, int|string $value): bool
+    {
         $identifier = strtolower($uniqueIdentifierName);
 
         if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email')
@@ -132,12 +133,19 @@ class User {
      * @author David Pilarski
      * @return User Instance of new user
      */
-    public static function build(string $username, string $email, string $password): User {
+    public static function build(string $username, string $email, string $password): User
+    {
         $user = new User();
         $user->setUsername($username);
         $user->setEmail($email);
         $user->setPassword($password);
         return $user;
+    }
+
+    public static function fetch(PDO $pdo, int $id): ?User
+    {
+        $user = new User();
+        return $user->load($pdo, 'id', $id);
     }
 
     #region Getters & Setters
