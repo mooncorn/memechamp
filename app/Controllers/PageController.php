@@ -14,7 +14,7 @@ class PageController
     public function comments(int $id)
     {
         global $pdo;
-        $comments = Comment::fetchCommentsWithOwnerAndReplies($pdo, 'post_id', 1);
+        $comments = Comment::fetchCommentsAll($pdo, 'post_id', 1);
         require_once APP_ROOT . '/views/PostComments.php';
     }
 }

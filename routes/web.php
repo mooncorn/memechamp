@@ -92,6 +92,12 @@ $routes->add('edit_comment', new Route(
     array('id' => '[0-9]+')
 ));
 
+$routes->add('like_comment', new Route(
+    constant('URL_SUBFOLDER') . '/comment/{id}/like',
+    array('controller' => 'CommentController', 'method'=>'likeComment'),
+    array('id' => '[0-9]+')
+));
+
 // ================== (End) Routes ==================
 
 // global url generator
