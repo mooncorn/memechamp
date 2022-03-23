@@ -41,7 +41,7 @@ $routes->add('signout', new Route(
 ));
 
 $routes->add('profile', new Route(
-    constant('URL_SUBFOLDER') . '/user/{id}/tab/{tab}',
+    constant('URL_SUBFOLDER') . '/user/{id}/{tab}',
     array('controller' => 'UserController', 'method'=>'profile', 'tab'=>'posts'),
     array('id' => '[0-9]+', 'tab'=>'.+'),
     array(),

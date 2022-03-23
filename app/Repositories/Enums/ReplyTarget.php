@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Enums;
+namespace App\Repositories\Enums;
 
 enum ReplyTarget {
     case POST;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Repositories;
 
 use App\Helpers\DBConnection;
 use Exception;
