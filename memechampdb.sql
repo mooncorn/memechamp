@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 19, 2022 at 08:21 PM
+-- Generation Time: Mar 23, 2022 at 08:16 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -48,6 +48,18 @@ INSERT INTO `comment` (`id`, `content`, `owner_id`, `reply_to_id`, `post_id`, `d
 (4, 'wow this is great!', 3, NULL, 1, 0, 0, '2022-03-19'),
 (7, 'hahah', 4, 2, 1, 0, 0, '2022-03-19'),
 (8, 'whats so funny', 5, 7, 1, 0, 0, '2022-03-19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comment_like`
+--
+
+CREATE TABLE `comment_like` (
+  `id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -118,7 +130,7 @@ INSERT INTO `user` (`id`, `username`, `email`, `password`, `pfp`, `current_pogge
 (3, 'test1', 'test1@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
 (4, 'test2', 'test2@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
 (5, 'test3', 'test3@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
-(6, 'test4', 'test4@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
+(6, 'pdo', 'test4@test.com', 'test', '2022-03-21-1647869101-480529553.jpg', 10, 10, 0, 0, '2022-03-15'),
 (7, 'test5', 'test5@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
 (8, 'test7', 'test7@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
 (9, 'test8', 'test6@test.com', 'test', '', 10, 10, 0, 0, '2022-03-15'),
@@ -131,7 +143,9 @@ INSERT INTO `user` (`id`, `username`, `email`, `password`, `pfp`, `current_pogge
 (16, 'p3', 'p3@p', 'p', '', 10, 10, 0, 0, '2022-03-15'),
 (17, 'p4', 'p4@p', 'p', '2022-03-16-1647399482-1323223134.jpg', 10, 10, 0, 0, '2022-03-15'),
 (18, 'horde', 'horde@horde', 'horde', '2022-03-17-1647529609-853729986.jpg', 10, 10, 0, 0, '2022-03-17'),
-(19, 'changedtest', 'john@gmail.com', 'john', '', 10, 10, 0, 0, '2022-03-19');
+(19, 'changedtest', 'john@gmail.com', 'john', '', 10, 10, 0, 0, '2022-03-19'),
+(20, 'dp', 'dp@dp.com', 'dp', '', 10, 10, 0, 0, '2022-03-21'),
+(21, '', '', '', '', 10, 10, 0, 0, '2022-03-21');
 
 --
 -- Indexes for dumped tables
@@ -145,6 +159,14 @@ ALTER TABLE `comment`
   ADD KEY `post_fk` (`post_id`),
   ADD KEY `reply_to_id` (`reply_to_id`),
   ADD KEY `owner_id` (`owner_id`);
+
+--
+-- Indexes for table `comment_like`
+--
+ALTER TABLE `comment_like`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `comment_id` (`comment_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `competition`
@@ -179,6 +201,12 @@ ALTER TABLE `comment`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `comment_like`
+--
+ALTER TABLE `comment_like`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `competition`
 --
 ALTER TABLE `competition`
@@ -194,7 +222,7 @@ ALTER TABLE `post`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables
@@ -207,6 +235,13 @@ ALTER TABLE `comment`
   ADD CONSTRAINT `comment_owner_fk` FOREIGN KEY (`owner_id`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `comment_post_fk` FOREIGN KEY (`post_id`) REFERENCES `post` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `comment_reply_to_fk` FOREIGN KEY (`reply_to_id`) REFERENCES `comment` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `comment_like`
+--
+ALTER TABLE `comment_like`
+  ADD CONSTRAINT `like_comment_fk` FOREIGN KEY (`comment_id`) REFERENCES `comment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `like_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `post`

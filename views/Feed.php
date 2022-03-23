@@ -1,10 +1,8 @@
 <?php
-include 'Header.php';
 
-/**
- * @var RouteCollection $routes
- * @var User $user
- */
+use App\Helpers\Routing;
+
+include 'Header.php';
 
 ?>
     <style>
@@ -16,8 +14,8 @@ include 'Header.php';
         }
     </style>
 
-
     <section>
         <h1>Homepage</h1>
+        <a href="<?= Routing::getCustomUrlTo('comments', ['id' => 1]) ?>">Go to Post 1</a>
     <section>
 <?php include 'Footer.php'; ?>

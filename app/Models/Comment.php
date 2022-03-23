@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use PDO;
+use App\Helpers\DBConnection;
+use App\Models\Enums\ReplyTarget;
+use Exception;
 
 class Comment
 {
@@ -15,9 +17,7 @@ class Comment
     private bool $edited;
     private string $created_at;
 
-    private CommentCollection $replies; // an array of comments
-
-    public function __construct(int $indentation = 0)
+    public function __construct()
     {
         $this->id = 0;
         $this->content = "";
@@ -27,68 +27,121 @@ class Comment
         $this->deleted = false;
         $this->edited = false;
         $this->created_at = "";
-        $this->replies = new CommentCollection($indentation);
     }
 
-    public function load(PDO $pdo, int $id): ?Comment
+    public function load(int $id): ?Comment
     {
+        $pdo = DBConnection::getDB();
         $row = $pdo->query("SELECT * FROM comment WHERE id=$id")->fetch();
 
-        if ($row) {
-            $this->id = $row["id"];
-            $this->content = $row["content"];
-            $this->owner_id = $row['owner_id'];
-            $this->reply_to_id = $row["reply_to_id"];
-            $this->post_id = $row["post_id"];
-            $this->deleted = $row['deleted'];
-            $this->edited = $row['edited'];
-            $this->created_at = $row["created_at"];
+        if (!$row) return null;
 
-            // every comment will load its own replies
-            $this->loadReplies($pdo);
-
-            return $this;
-        }
-
-        return null;
+        $this->id = $row["id"];
+        $this->content = $row["content"];
+        $this->owner_id = $row['owner_id'];
+        $this->reply_to_id = $row["reply_to_id"];
+        $this->post_id = $row["post_id"];
+        $this->deleted = $row['deleted'];
+        $this->edited = $row['edited'];
+        $this->created_at = $row["created_at"];
+        return $this;
     }
 
-    public function save(PDO $pdo): ?Comment {
-        // if comment already has an id, update existing comment
-        if ($this->isLoaded()) {
-            $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited='true' WHERE id=?");
-            $stmt->execute([$this->content, $this->deleted, $this->id]);
-        }
-        // if comment does not have an id, insert new comment
-        else {
-            $stmt = $pdo->prepare("INSERT INTO comment (content, reply_to_id, post_id) VALUES (?, ?, ?)");
-            $stmt->execute([$this->content, $this->reply_to_id, $this->post_id]);
-        }
+    public function save(): ?Comment
+    {
+        $pdo = DBConnection::getDB();
+        try
+        {
+            if ($this->id != 0)
+            {
+                $stmt = $pdo->prepare("UPDATE comment SET content=?,deleted=?,edited=1 WHERE id=?");
+                $stmt->execute([$this->content, $this->deleted, $this->id]);
+            }
+            else
+            {
+                $stmt = $pdo->prepare("INSERT INTO comment (content, reply_to_id, post_id, owner_id) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$this->content, $this->reply_to_id, $this->post_id, $this->owner_id]);
+            }
 
-        if ($this->load($pdo, $this->id)) {
-            return $this;
-        } else {
+            return $this->load($this->id);
+        }
+        catch (Exception $e)
+        {
             return null;
         }
     }
 
-    public function isLoaded(): bool {
-        return $this->id != 0;
-    }
-
-    public function loadReplies(PDO $pdo)
+    public static function getReplies(int $id, ReplyTarget $target = ReplyTarget::COMMENT): array
     {
-        $this->replies->load($pdo, 'reply_to_id', $this->id);
-    }
+        $pdo = DBConnection::getDB();
+        $comments = [];
 
-    public function getOwner(PDO $pdo): ?User
-    {
-        $owner = new User();
-        if ($owner->load($pdo, 'id', $this->owner_id)) {
-            return $owner;
+        if ($target == ReplyTarget::POST) {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE post_id=$id AND reply_to_id IS NULL");
+        } else {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE reply_to_id=$id");
         }
 
-        return null;
+        while ($row = $stmt->fetch())
+        {
+            $comments[] = Comment::parseToObject($row);
+        }
+
+        return $comments;
+    }
+
+    public static function getCount(int $id, ReplyTarget $target = ReplyTarget::COMMENT): int
+    {
+        $pdo = DBConnection::getDB();
+
+        if ($target == ReplyTarget::POST) {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE post_id=$id");
+        } else {
+            $stmt = $pdo->query("SELECT * FROM comment WHERE reply_to_id=$id");
+        }
+
+        return count($stmt->fetchAll());
+    }
+
+    public static function parseToObject($row): Comment
+    {
+        $comment = new Comment();
+        $comment->setId($row['id']);
+        $comment->setContent($row['content']);
+        $comment->setOwnerId($row['owner_id']);
+        $comment->setReplyToId($row['reply_to_id']);
+        $comment->setPostId($row['post_id']);
+        $comment->setDeleted($row['deleted']);
+        $comment->setEdited($row['edited']);
+        $comment->setCreatedAt($row['created_at']);
+        return $comment;
+    }
+
+    public function getOwner(): ?User
+    {
+        return User::fetch($this->owner_id);
+    }
+
+    public static function fetch(int $id): ?Comment
+    {
+        $comment = new Comment();
+        return $comment->load($id);
+    }
+
+    public static function build(string $content, $post_id, $owner_id, $reply_to_id = null): Comment
+    {
+        $comment = new Comment();
+        $comment->setContent($content);
+        $comment->setPostId($post_id);
+        $comment->setOwnerId($owner_id);
+        $comment->setReplyToId($reply_to_id);
+        return $comment;
+    }
+
+    public function getLikes(): int
+    {
+        $pdo = DBConnection::getDB();
+        return count($pdo->query("SELECT id FROM comment_like WHERE comment_id = $this->id")->fetchAll());
     }
 
     #region Getters & Setters
@@ -173,22 +226,6 @@ class Comment
     }
 
     /**
-     * @param CommentCollection $replies
-     */
-    public function setReplies(CommentCollection $replies): void
-    {
-        $this->replies = $replies;
-    }
-
-    /**
-     * @return CommentCollection
-     */
-    public function getReplies(): CommentCollection
-    {
-        return $this->replies;
-    }
-
-    /**
      * @return int|null
      */
     public function getOwnerId(): int|null
@@ -235,7 +272,5 @@ class Comment
     {
         $this->edited = $edited;
     }
-
-
     #endregion
 }

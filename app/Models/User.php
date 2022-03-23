@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Helpers\DBConnection;
+use App\Models\Enums\GetUserBy;
 use Exception;
-use PDO;
 
 class User {
     private int $id;
@@ -31,74 +32,58 @@ class User {
         $this->created_at = "";
     }
 
-    /**
-     * @throws Exception
-     */
-    public function load(PDO $pdo, string $uniqueIdentifierName, int|string $value): ?User {
-        $identifier = strtolower($uniqueIdentifierName);
+    public function load(GetUserBy $column, int|string $value): ?User
+    {
+        $pdo = DBConnection::getDB();
+        $row = $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
 
-        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email') {
-            throw new Exception('Invalid identifier. Must be id, username or email.');
-        }
+        if (!$row) return null;
 
-        $stmt = $pdo->query("SELECT * FROM user WHERE $identifier='$value'");
-        $row = $stmt->fetch();
-
-        if ($row) {
-          $this->id = $row["id"];
-          $this->email = $row["email"];
-          $this->username = $row["username"];
-          $this->password = $row["password"];
-          $this->pfp = $row["pfp"];
-          $this->current_poggers = $row["current_poggers"];
-          $this->max_poggers = $row["max_poggers"];
-          $this->is_banned = $row["is_banned"];
-          $this->is_admin = $row["is_admin"];
-          $this->created_at = $row["created_at"];
-
-          return $this;
-        }
-
-        return null;
+        $this->id = $row["id"];
+        $this->email = $row["email"];
+        $this->username = $row["username"];
+        $this->password = $row["password"];
+        $this->pfp = $row["pfp"];
+        $this->current_poggers = $row["current_poggers"];
+        $this->max_poggers = $row["max_poggers"];
+        $this->is_banned = $row["is_banned"];
+        $this->is_admin = $row["is_admin"];
+        $this->created_at = $row["created_at"];
+        return $this;
     }
 
-    public function save(PDO $pdo): ?User {
-        // if user already has an id, update existing user
-        if ($this->isLoaded()) {
-            $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, current_poggers=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
-            $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->current_poggers, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
-        }
-        // if user does not have an id, insert new user
-        else {
-            $stmt = $pdo->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
-            $stmt->execute([$this->username, $this->email, $this->password]);
-        }
+    public function save(): ?User
+    {
+        $pdo = DBConnection::getDB();
+        try
+        {
+            if ($this->id != 0)
+            {
+                $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, current_poggers=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
+                $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->current_poggers, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
+            }
+            else
+            {
+                $stmt = $pdo->prepare("INSERT INTO user (username, email, password) VALUES (?, ?, ?)");
+                $stmt->execute([$this->username, $this->email, $this->password]);
+            }
 
-        if ($this->load($pdo, "username", $this->username)) {
-            return $this;
+            return $this->load($pdo, "username", $this->username);
         }
-
-        return null;
+        catch (Exception $e)
+        {
+            return null;
+        }
     }
 
-    public static function exists(PDO $pdo, string $uniqueIdentifierName, int|string $value): bool {
-        $identifier = strtolower($uniqueIdentifierName);
-
-        if ($identifier != 'id' && $identifier != 'username' && $identifier != 'email') {
-            throw new Exception('Invalid identifier. Must be id, username or email.');
-        }
-
-        $stmt = $pdo->query("SELECT * FROM user WHERE $identifier='$value'");
-        $row = $stmt->fetch();
-
-        if ($row) {
-            return true;
-        }
-
-        return false;
+    public static function exists(GetUserBy $column, int|string $value): bool
+    {
+        $pdo = DBConnection::getDB();
+        return (bool) $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
     }
 
-    public static function build(string $username, string $email, string $password): User {
+    public static function build(string $username, string $email, string $password): User
+    {
         $user = new User();
         $user->setUsername($username);
         $user->setEmail($email);
@@ -106,8 +91,23 @@ class User {
         return $user;
     }
 
-    public function isLoaded(): bool {
-        return $this->id != 0;
+    public static function fetch(int $id): ?User
+    {
+        $user = new User();
+        return $user->load(GetUserBy::ID, $id);
+    }
+
+    public function getComments(): array
+    {
+        $pdo = DBConnection::getDB();
+        $comments = [];
+        $stmt = $pdo->query("SELECT * FROM comment WHERE owner_id=$this->id");
+
+        while ($row = $stmt->fetch()) {
+            $comments[] = Comment::parseToObject($row);
+        }
+
+        return $comments;
     }
 
     #region Getters & Setters
@@ -186,13 +186,9 @@ class User {
     /**
      * @param string $pfp
      */
-    public function setPfp(string|null $pfp): void
+    public function setPfp(string $pfp): void
     {
-        if ($pfp) {
-            $this->pfp = $pfp;
-        } else {
-            $this->pfp = "";
-        }
+        $this->pfp = $pfp;
     }
 
     /**
@@ -230,25 +226,9 @@ class User {
     /**
      * @return bool
      */
-    public function isBanned(): bool
+    public function isIsBanned(): bool
     {
         return $this->is_banned;
-    }
-
-    /**
-     * @param bool $is_admin
-     */
-    public function setIsAdmin(bool $is_admin): void
-    {
-        $this->is_admin = $is_admin;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getIsAdmin(): bool
-    {
-        return $this->is_admin;
     }
 
     /**
@@ -260,6 +240,22 @@ class User {
     }
 
     /**
+     * @return bool
+     */
+    public function isIsAdmin(): bool
+    {
+        return $this->is_admin;
+    }
+
+    /**
+     * @param bool $is_admin
+     */
+    public function setIsAdmin(bool $is_admin): void
+    {
+        $this->is_admin = $is_admin;
+    }
+
+    /**
      * @return string
      */
     public function getCreatedAt(): string
@@ -268,14 +264,11 @@ class User {
     }
 
     /**
-     * @return CommentCollection
+     * @param string $created_at
      */
-    public function getCommentCollection($pdo): CommentCollection
+    public function setCreatedAt(string $created_at): void
     {
-        $comments = new CommentCollection();
-        $comments->load($pdo, 'owner_id', $this->id);
-        return $comments;
+        $this->created_at = $created_at;
     }
-
     #endregion
 }

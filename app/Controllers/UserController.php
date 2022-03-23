@@ -4,62 +4,74 @@ namespace App\Controllers;
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
+use App\Models\Comment;
+use App\Models\Enums\GetUserBy;
 use App\Models\User;
 
 class UserController
 {
-    // Show user attributes based on the id provided in the url
-	public function profile(int $id, string $tab) {
-        global $pdo;
+	public function profile(int $id, string $tab)
+    {
+        $user = User::fetch($id);
 
-        $user = new User();
-
-        if ($user->load($pdo, 'id', $id)) {
-
-            if ($tab == "comments") {
-                $comments = $user->getCommentCollection($pdo)->getComments();
+        if ($user)
+        {
+            if ($tab == "comments")
+            {
+                $comments = $user->getComments();
             }
 
             require_once APP_ROOT . '/views/Profile.php';
-        } else {
+        }
+        else
+        {
             require_once APP_ROOT . '/views/404.php';
         }
 	}
 
-    public function signup() {
-        global $pdo;
+    public function signup()
+    {
         $errors = array();
 
-        if (!empty($_POST)) {
+        if (!empty($_POST))
+        {
             $username = filter_input(INPUT_POST, 'username');
             $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
             $password = filter_input(INPUT_POST, 'password');
 
             // check required fields
-            if (!$username) {
+            if (!$username)
+            {
                 $errors["username"] = "Username is required";
             }
-            if (!$email) {
+            if (!$email)
+            {
                 $errors["email"] = "Email is invalid";
             }
-            if (!$password) {
+            if (!$password)
+            {
                 $errors["password"] = "Password is required";
             }
 
             // check unique fields
-            if (!isset($errors['email'])) {
-                if (User::exists($pdo, 'email', $email)) {
+            if (!isset($errors['email']))
+            {
+                if (User::exists(GetUserBy::EMAIL, $email))
+                {
                     $errors['email'] = 'Email is taken';
                 }
             }
-            if (!isset($errors['username'])) {
-                if (User::exists($pdo, 'username', $username)) {
+            if (!isset($errors['username']))
+            {
+                if (User::exists(GetUserBy::USERNAME, $username))
+                {
                     $errors['username'] = "Username is taken";
                 }
             }
 
-            if (empty($errors)) {
-                $user = User::build($username, $email, $password)->save($pdo);
+            if (empty($errors))
+            {
+                $user = User::build($username, $email, $password)->save();
 
                 // add user info to the current session
                 Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
@@ -74,38 +86,46 @@ class UserController
 
     public function signin()
     {
-        global $pdo;
         $errors = array();
 
-        if (!empty($_POST)) {
+        if (!empty($_POST))
+        {
             $username = filter_input(INPUT_POST, 'username');
             $password = filter_input(INPUT_POST, 'password');
 
             // check required fields
-            if (!$username) {
+            if (!$username)
+            {
                 $errors["username"] = "Username is required";
             }
-            if (!$password) {
+            if (!$password)
+            {
                 $errors["password"] = "Password is required";
             }
 
-            if (empty($errors)) {
+            if (empty($errors))
+            {
                 $user = new User();
-                $user->load($pdo, 'username', $username);
 
                 // if user with provided username was found
-                if ($user->isLoaded()) {
+                if ($user->load(GetUserBy::USERNAME, $username))
+                {
                     // verify if the passwords match
-                    if ($user->getPassword() == $password) {
+                    if ($user->getPassword() == $password)
+                    {
                         // add user info to the current session
                         Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
 
                         // redirect to homepage
                         Routing::redirectToPage('homepage');
-                    } else {
+                    }
+                    else
+                    {
                         $errors["main"] = "Invalid credentials";
                     }
-                } else {
+                }
+                else
+                {
                     $errors["main"] = "Invalid credentials";
                 }
             }
@@ -121,43 +141,51 @@ class UserController
         Routing::redirectToPage('homepage');
     }
 
-    public function edit_profile(int $id) {
-        global $pdo;
+    public function edit_profile(int $id)
+    {
         $errors = array();
         $messages = array();
 
         // handle username update only if current user has permission
-        if (Auth::isOwner($id)) {
-
-            $user = new User();
-            $user->load($pdo, 'id', $id);
+        if (Auth::isOwner($id))
+        {
+            $user = User::fetch($id);
 
             // handle username update
-            if (isset($_POST['username'])) {
+            if (isset($_POST['username']))
+            {
                 $username = filter_input(INPUT_POST, 'username');
 
                 // check if username passed filter
-                if ($username) {
+                if ($username)
+                {
                     // check if username is unique
-                    if (!User::exists($pdo, 'username', $username)) {
+                    if (!User::exists(GetUserBy::USERNAME, $username))
+                    {
                         $user->setUsername($username);
-                        $user->save($pdo);
+                        $user->save();
 
                         Auth::setSession(['username' => $username]);
 
                         $messages['username'] = 'Username updated successfully';
-                    } else {
+                    }
+                    else
+                    {
                         $errors['username'] = 'Username is taken';
                     }
-                } else {
+                }
+                else
+                {
                     $errors['username'] = 'Username is required';
                 }
             }
 
             // TODO: refactor this eventually
             // handle pfp update
-            if (!empty($_FILES)) {
-                if (!empty($_FILES['pfp']['name'])) {
+            if (!empty($_FILES))
+            {
+                if (!empty($_FILES['pfp']['name']))
+                {
                     $targetDir = APP_ROOT . '/public/images/uploads/pfps';
                     $fileName = basename($_FILES['pfp']['name']);
                     $fileType = pathinfo($fileName,PATHINFO_EXTENSION);
@@ -169,24 +197,32 @@ class UserController
 
                     // Allow certain file formats
                     $allowTypes = array('jpg','png','jpeg');
-                    if(in_array($fileType, $allowTypes)) {
+                    if(in_array($fileType, $allowTypes))
+                    {
                         // Upload file to server
-                        if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath)){
+                        if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath))
+                        {
                             // Insert image file name into database
                             $user->setPfp($newFileName);
-                            $user->save($pdo);
+                            $user->save();
                             $messages['pfp'] = 'Profile picture updated successfully';
                         }
-                    } else {
+                    }
+                    else
+                    {
                         $errors['pfp'] = 'Only JPG, JPEG & PNG files are allowed';
                     }
-                } else {
+                }
+                else
+                {
                     $errors['pfp'] = 'Image is required';
                 }
             }
 
             require_once APP_ROOT . '/views/EditProfile.php';
-        } else {
+        }
+        else
+        {
             require_once APP_ROOT . '/views/Unauthorized.php';
         }
     }
