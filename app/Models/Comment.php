@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Models;
 
 use App\Helpers\DBConnection;
-use App\Repositories\Enums\ReplyTarget;
+use App\Models\Enums\ReplyTarget;
 use Exception;
 
 class Comment
@@ -117,9 +117,9 @@ class Comment
         return $comment;
     }
 
-    public function getOwner(): ?UserRepository
+    public function getOwner(): ?User
     {
-        return UserRepository::fetch($this->owner_id);
+        return User::fetch($this->owner_id);
     }
 
     public static function fetch(int $id): ?Comment

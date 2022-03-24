@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Enums;
+namespace App\Models\Enums;
 
 enum CommentForeignKey: string {
     case POST_ID = 'post_id';

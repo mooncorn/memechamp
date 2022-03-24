@@ -2,9 +2,9 @@
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Repositories\Comment;
-use App\Repositories\Enums\ReplyTarget;
-use App\Repositories\Like;
+use App\Models\Comment;
+use App\Models\Enums\ReplyTarget;
+use App\Models\Like;
 
 include 'Header.php';
 

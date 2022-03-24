@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Enums;
+namespace App\Models\Enums;
 
 enum GetUserBy: string {
     case EMAIL = 'email';

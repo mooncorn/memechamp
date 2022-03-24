@@ -2,14 +2,14 @@
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Repositories\UserRepository;
+use App\Models\User;
 
 include 'Header.php';
 
 /**
  * @var Auth
  * @var Routing
- * @var UserRepository $user
+ * @var User $user
  * @var string $tab
  * @var array $comments
  */

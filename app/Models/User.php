@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Models;
 
 use App\Helpers\DBConnection;
-use App\Repositories\Enums\GetUserBy;
+use App\Models\Enums\GetUserBy;
 use Exception;
-use PDO;
 
-class UserRepository {
+class User {
     private int $id;
     private string $email;
     private string $username;
@@ -33,7 +32,7 @@ class UserRepository {
         $this->created_at = "";
     }
 
-    public function load(GetUserBy $column, int|string $value): ?UserRepository
+    public function load(GetUserBy $column, int|string $value): ?User
     {
         $pdo = DBConnection::getDB();
         $row = $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
@@ -53,8 +52,9 @@ class UserRepository {
         return $this;
     }
 
-    public function save(PDO $pdo): ?UserRepository
+    public function save(): ?User
     {
+        $pdo = DBConnection::getDB();
         try
         {
             if ($this->id != 0)
@@ -82,18 +82,18 @@ class UserRepository {
         return (bool) $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
     }
 
-    public static function build(string $username, string $email, string $password): UserRepository
+    public static function build(string $username, string $email, string $password): User
     {
-        $user = new UserRepository();
+        $user = new User();
         $user->setUsername($username);
         $user->setEmail($email);
         $user->setPassword($password);
         return $user;
     }
 
-    public static function fetch(int $id): ?UserRepository
+    public static function fetch(int $id): ?User
     {
-        $user = new UserRepository();
+        $user = new User();
         return $user->load(GetUserBy::ID, $id);
     }
 

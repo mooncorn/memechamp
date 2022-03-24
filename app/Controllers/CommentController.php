@@ -4,9 +4,9 @@ namespace App\Controllers;
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Repositories\Comment;
-use App\Repositories\Like;
-use App\Repositories\UserRepository;
+use App\Models\Comment;
+use App\Models\Like;
+use App\Models\User;
 
 class CommentController
 {
@@ -57,7 +57,7 @@ class CommentController
 
         $errors = [];
         $comment = Comment::fetch($id);
-        $user= UserRepository::fetch($comment->getOwnerId());
+        $user= User::fetch($comment->getOwnerId());
 
         if (isset($_POST['content']))
         {

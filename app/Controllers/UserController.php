@@ -4,15 +4,15 @@ namespace App\Controllers;
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Repositories\Comment;
-use App\Repositories\Enums\GetUserBy;
-use App\Repositories\UserRepository;
+use App\Models\Comment;
+use App\Models\Enums\GetUserBy;
+use App\Models\User;
 
 class UserController
 {
 	public function profile(int $id, string $tab)
     {
-        $user = UserRepository::fetch($id);
+        $user = User::fetch($id);
 
         if ($user)
         {
@@ -56,14 +56,14 @@ class UserController
             // check unique fields
             if (!isset($errors['email']))
             {
-                if (UserRepository::exists(GetUserBy::EMAIL, $email))
+                if (User::exists(GetUserBy::EMAIL, $email))
                 {
                     $errors['email'] = 'Email is taken';
                 }
             }
             if (!isset($errors['username']))
             {
-                if (UserRepository::exists(GetUserBy::USERNAME, $username))
+                if (User::exists(GetUserBy::USERNAME, $username))
                 {
                     $errors['username'] = "Username is taken";
                 }
@@ -71,7 +71,7 @@ class UserController
 
             if (empty($errors))
             {
-                $user = UserRepository::build($username, $email, $password)->save();
+                $user = User::build($username, $email, $password)->save();
 
                 // add user info to the current session
                 Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
@@ -105,7 +105,7 @@ class UserController
 
             if (empty($errors))
             {
-                $user = new UserRepository();
+                $user = new User();
 
                 // if user with provided username was found
                 if ($user->load(GetUserBy::USERNAME, $username))
@@ -149,7 +149,7 @@ class UserController
         // handle username update only if current user has permission
         if (Auth::isOwner($id))
         {
-            $user = UserRepository::fetch($id);
+            $user = User::fetch($id);
 
             // handle username update
             if (isset($_POST['username']))
@@ -160,7 +160,7 @@ class UserController
                 if ($username)
                 {
                     // check if username is unique
-                    if (!UserRepository::exists(GetUserBy::USERNAME, $username))
+                    if (!User::exists(GetUserBy::USERNAME, $username))
                     {
                         $user->setUsername($username);
                         $user->save();

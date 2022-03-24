@@ -2,14 +2,14 @@
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Repositories\Comment;
-use App\Repositories\UserRepository;
+use App\Models\Comment;
+use App\Models\User;
 
 include 'Header.php';
 
 /**
  * @var Comment $comment
- * @var UserRepository $user owner of the comment
+ * @var User $user owner of the comment
  * @var array $errors
  * @var string $content
  */
@@ -17,7 +17,7 @@ include 'Header.php';
 function renderComments(array $comments) {
     foreach ($comments as $commentWithOwnerAndReplies) {
         $comment = $commentWithOwnerAndReplies['Comment'];
-        $user = $commentWithOwnerAndReplies['UserRepository'];
+        $user = $commentWithOwnerAndReplies['User'];
         $replies = $commentWithOwnerAndReplies['Replies'];
         ?>
         <li class="list-group-item">
