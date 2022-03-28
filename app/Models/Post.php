@@ -50,7 +50,7 @@ class Post {
                 $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img, created_at) VALUES (?, ?, ?, ?, ?)");
                 $stmt->execute([$this->user_id, $this->comp_id, $this->title, $this->img, $this->created_at]);
             }
-            return $this->load($pdo, )
+            return $this;
         }
         catch (Exception $e)
         {
