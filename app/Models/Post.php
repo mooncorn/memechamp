@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models;
+
 use App\Helpers\DBConnection;
 
 class Post {
@@ -25,18 +27,19 @@ class Post {
         $pdo = DBConnection::getDB();
         $row = $pdo->query("SELECT * FROM post WHERE user_id=$id")->fetch();
         if ($row) {
-            $this->$row['id'];
-            $this->$row['comp_id'];
-            $this->$row['title'];
-            $this->$row['img'];
-            $this->$row['created_at'];
+            $this->id = $row['id'];
+            $this->user_id = $row['user_id'];
+            $this->comp_id = $row['comp_id'];
+            $this->title = $row['title'];
+            $this->img = $row['img'];
+            $this->created_at = $row['created_at'];
             return $this;
         } else {
             return null;
         }
     }
 
-    public function save(): ?post
+    public function save(): ?Post
     {
         $pdo = DBConnection::getDB();
         try {
@@ -47,8 +50,8 @@ class Post {
             }
             else
             {
-                $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img, created_at) VALUES (?, ?, ?, ?, ?)");
-                $stmt->execute([$this->user_id, $this->comp_id, $this->title, $this->img, $this->created_at]);
+                $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$this->user_id, $this->comp_id, $this->title, $this->img]);
             }
             return $this;
         }
