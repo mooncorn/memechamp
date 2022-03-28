@@ -1,5 +1,7 @@
 <?php
 
+use App\Helpers\DBConnection;
+
 class Post {
     protected int $id;
     protected int $user_id;
@@ -8,23 +10,52 @@ class Post {
     protected string $img;
     protected string $created_at;
 
-    /**
-     * @param int $id
-     * @param int $user_id
-     * @param int $comp_id
-     * @param string $title
-     * @param string $img
-     * @param string $created_at
-     */
-
-    public function __construct(int $id, int $user_id, int $comp_id, string $title, string $img, string $created_at)
+    public function __construct()
     {
-        $this->id = $id;
-        $this->user_id = $user_id;
-        $this->comp_id = $comp_id;
-        $this->title = $title;
-        $this->img = $img;
-        $this->created_at = $created_at;
+        $this->id = 0;
+        $this->user_id = 0;
+        $this->comp_id = 0;
+        $this->title = "";
+        $this->img = "";
+        $this->created_at = "";
+    }
+
+    public function load(int $id): ?Post
+    {
+        $pdo = DBConnection::getDB();
+        $row = $pdo->query("SELECT * FROM post WHERE user_id=$id")->fetch();
+        if ($row) {
+            $this->$row['id'];
+            $this->$row['comp_id'];
+            $this->$row['title'];
+            $this->$row['img'];
+            $this->$row['created_at'];
+            return $this;
+        } else {
+            return null;
+        }
+    }
+
+    public function save(): ?post
+    {
+        $pdo = DBConnection::getDB();
+        try {
+            if ($this->id != 0)
+            {
+                $stmt = $pdo->prepare("UPDATE post SET title=?, img=? WHERE id=?");
+                $stmt->execute([$this->title, $this->img, $this->id]);
+            }
+            else
+            {
+                $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img, created_at) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$this->user_id, $this->comp_id, $this->title, $this->img, $this->created_at]);
+            }
+            return $this->load($pdo, )
+        }
+        catch (Exception $e)
+        {
+            return null;
+        }
     }
 
     /**
