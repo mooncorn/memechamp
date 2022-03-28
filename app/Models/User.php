@@ -68,7 +68,7 @@ class User {
                 $stmt->execute([$this->username, $this->email, $this->password]);
             }
 
-            return $this->load(GetUserBy::USERNAME, $this->username);
+            return $this;
         }
         catch (Exception $e)
         {
