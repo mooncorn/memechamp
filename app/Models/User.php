@@ -68,7 +68,7 @@ class User {
                 $stmt->execute([$this->username, $this->email, $this->password]);
             }
 
-            return $this->load($pdo, "username", $this->username);
+            return $this;
         }
         catch (Exception $e)
         {

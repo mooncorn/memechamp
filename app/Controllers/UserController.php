@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Models\Comment;
 use App\Models\Enums\GetUserBy;
 use App\Models\User;
 
@@ -72,6 +71,7 @@ class UserController
             if (empty($errors))
             {
                 $user = User::build($username, $email, $password)->save();
+                $user->load(GetUserBy::USERNAME, $username);
 
                 // add user info to the current session
                 Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);

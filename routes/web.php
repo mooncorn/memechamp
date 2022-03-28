@@ -41,9 +41,9 @@ $routes->add('signout', new Route(
 ));
 
 $routes->add('profile', new Route(
-    constant('URL_SUBFOLDER') . '/user/{id}/tab/{tab}',
+    constant('URL_SUBFOLDER') . '/user/{id}/{tab}',
     array('controller' => 'UserController', 'method'=>'profile', 'tab'=>'posts'),
-    array('id' => '[0-9]+', 'tab'=>'.+'),
+    array(),
     array(),
     '',
     array(),
@@ -51,7 +51,7 @@ $routes->add('profile', new Route(
 ));
 
 $routes->add('edit_profile', new Route(
-    constant('URL_SUBFOLDER') . '/user/{id}/edit',
+    constant('URL_SUBFOLDER') . '/edit/user/{id}',
     array('controller' => 'UserController', 'method'=>'edit_profile'),
     array('id' => '[0-9]+')
 ));
