@@ -14,7 +14,10 @@ include 'Header.php';
  * @var array $comments
  */
 
-function renderComments(array $comments) {
+function renderComments(User $user)
+{
+    $comments = $user->getComments();
+
     if (empty($comments)) {
         echo "no comments";
         return;
@@ -24,10 +27,39 @@ function renderComments(array $comments) {
     foreach ($comments as $comment) {
         if (!$comment->isDeleted()) {
             $content = $comment->getContent();
-            echo "<li class='list-group-item'>$content</li>";
+            $urlToPost = Routing::getCustomUrlTo('comments', ['id'=>$comment->getPostId()]);
+            echo "<li class='list-group-item'><a href='$urlToPost'>$content</a></li>";
         }
     }
     echo "</ul>";
+}
+
+function renderPosts(User $user)
+{
+    $posts = $user->getPosts();
+
+    if (empty($posts)) {
+        echo "no posts";
+        return;
+    }
+
+    echo "<ul class='list-group mt-3'>";
+    foreach ($posts as $post) {
+        $title = $post->getTitle();
+        $urlToPost = Routing::getCustomUrlTo('comments', ['id'=>$post->getId()]);
+        echo "<li class='list-group-item'><a href='$urlToPost'>$title</a></li>";
+    }
+    echo "</ul>";
+}
+
+function renderVoted(User $user)
+{
+
+}
+
+function renderLiked(User $user)
+{
+
 }
 
 ?>
@@ -96,7 +128,13 @@ function renderComments(array $comments) {
 
         <?php
             if ($tab == 'comments') {
-                renderComments($comments);
+                renderComments($user);
+            } else if ($tab == 'voted') {
+                renderVoted($user);
+            } else if ($tab == 'liked') {
+                renderLiked($user);
+            } else {
+                renderPosts($user);
             }
         ?>
 

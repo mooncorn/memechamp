@@ -10,7 +10,7 @@ use App\Models\User;
  */
 
 if (Auth::isAuthenticated()) {
-    $user = User::fetch(Auth::get('id'));
+    $currentUser = User::fetch(Auth::get('id'));
 }
 
 
@@ -71,7 +71,7 @@ if (Auth::isAuthenticated()) {
             <ul class="navbar-nav ms-auto align-items-center">
                 <?php if (Auth::isAuthenticated()) { ?>
                     <li class="nav-item">
-                        <small class="nav-link">Remaining Poggers: <?= $user->getRemainingPoggers() ?></small>
+                        <small class="nav-link">Remaining Poggers: <?= $currentUser->getRemainingPoggers() ?></small>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['id' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>

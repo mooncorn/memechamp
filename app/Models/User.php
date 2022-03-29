@@ -107,6 +107,21 @@ class User {
         return $comments;
     }
 
+    public function getPosts(): array
+    {
+        $pdo = DBConnection::getDB();
+        $posts = [];
+        $stmt = $pdo->query("SELECT id FROM post WHERE user_id=$this->id");
+
+        while ($row = $stmt->fetch()) {
+            $post = new Post();
+            $post->load($row["id"]);
+            $posts[] = $post;
+        }
+
+        return $posts;
+    }
+
     public function getRemainingPoggers(): int
     {
         $pdo = DBConnection::getDB();
