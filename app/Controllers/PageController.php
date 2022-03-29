@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\Vote;
+
 class PageController
 {
 	public function homepage()

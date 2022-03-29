@@ -15,11 +15,6 @@ class UserController
 
         if ($user)
         {
-            if ($tab == "comments")
-            {
-                $comments = $user->getComments();
-            }
-
             require_once APP_ROOT . '/views/Profile.php';
         }
         else

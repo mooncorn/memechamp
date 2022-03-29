@@ -97,6 +97,12 @@ $routes->add('like_comment', new Route(
     array('id' => '[0-9]+')
 ));
 
+$routes->add('handle_vote', new Route(
+    constant('URL_SUBFOLDER') . '/vote/post/{postId}/user/{userId}',
+    array('controller' => 'VoteController', 'method'=>'handleVote'),
+    array('postId' => '[0-9]+', 'userId' => '[0-9]+')
+));
+
 // ================== (End) Routes ==================
 
 // global url generator

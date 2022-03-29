@@ -12,7 +12,6 @@ class User {
     private string $username;
     private string $password;
     private string $pfp;
-    private int $current_poggers;
     private int $max_poggers;
     private bool $is_banned;
     private bool $is_admin;
@@ -25,7 +24,6 @@ class User {
         $this->username = "";
         $this->password = "";
         $this->pfp = "";
-        $this->current_poggers = 0;
         $this->max_poggers = 0;
         $this->is_banned = false;
         $this->is_admin = false;
@@ -44,7 +42,6 @@ class User {
         $this->username = $row["username"];
         $this->password = $row["password"];
         $this->pfp = $row["pfp"];
-        $this->current_poggers = $row["current_poggers"];
         $this->max_poggers = $row["max_poggers"];
         $this->is_banned = $row["is_banned"];
         $this->is_admin = $row["is_admin"];
@@ -108,6 +105,15 @@ class User {
         }
 
         return $comments;
+    }
+
+    public function getRemainingPoggers(): int
+    {
+        $pdo = DBConnection::getDB();
+        $result = $pdo->query("SELECT SUM(amount) FROM vote, post, competition WHERE vote.user_id=$this->id AND vote.post_id=post.id AND post.comp_id=competition.id AND competition.is_active=true")->fetch();
+
+        $sumOfVotes = $result["SUM(amount)"] ?? 0;
+        return $this->max_poggers - $sumOfVotes;
     }
 
     #region Getters & Setters
@@ -189,22 +195,6 @@ class User {
     public function setPfp(string $pfp): void
     {
         $this->pfp = $pfp;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCurrentPoggers(): int
-    {
-        return $this->current_poggers;
-    }
-
-    /**
-     * @param int $current_poggers
-     */
-    public function setCurrentPoggers(int $current_poggers): void
-    {
-        $this->current_poggers = $current_poggers;
     }
 
     /**
