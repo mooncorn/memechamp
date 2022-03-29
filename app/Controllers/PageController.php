@@ -10,4 +10,9 @@ class PageController
 	{
         require_once APP_ROOT . '/views/Feed.php';
     }
+
+    public function signup()
+    {
+        require_once APP_ROOT . '/views/Signup.php';
+    }
 }

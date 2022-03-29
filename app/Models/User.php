@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Framework\Exceptions\InvalidFieldValueException;
 use App\Helpers\DBConnection;
 use App\Models\Enums\GetUserBy;
 use Exception;
+use PDOException;
 
 class User {
     private int $id;
@@ -49,7 +51,7 @@ class User {
         return $this;
     }
 
-    public function save(): ?User
+    public function save(): User|string
     {
         $pdo = DBConnection::getDB();
         try
@@ -67,9 +69,9 @@ class User {
 
             return $this;
         }
-        catch (Exception $e)
+        catch (PDOException $e)
         {
-            return null;
+            return $e->getMessage();
         }
     }
 
@@ -79,6 +81,9 @@ class User {
         return (bool) $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
     }
 
+    /**
+     * @throws InvalidFieldValueException
+     */
     public static function build(string $username, string $email, string $password): User
     {
         $user = new User();
@@ -158,9 +163,14 @@ class User {
 
     /**
      * @param string $email
+     * @throws InvalidFieldValueException
      */
     public function setEmail(string $email): void
     {
+        if (User::exists(GetUserBy::EMAIL, $email)) {
+            throw new InvalidFieldValueException("Account with this email already exists", "email");
+        }
+
         $this->email = $email;
     }
 
@@ -174,9 +184,14 @@ class User {
 
     /**
      * @param string $username
+     * @throws InvalidFieldValueException
      */
     public function setUsername(string $username): void
     {
+        if (User::exists(GetUserBy::USERNAME, $username)) {
+            throw new InvalidFieldValueException("Account with this username already exists", "username");
+        }
+
         $this->username = $username;
     }
 

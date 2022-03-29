@@ -15,14 +15,24 @@ $routes->add('homepage', new Route(
     array('controller' => 'PageController', 'method'=>'homepage')
 ));
 
-$routes->add('signup', new Route(
-    constant('URL_SUBFOLDER') . '/signup',
+$routes->add('handle_signup', new Route(
+    constant('URL_SUBFOLDER') . '/api/signup',
     array('controller' => 'UserController', 'method'=>'signup'),
     array(),
     array(),
     '',
     array(),
-    array('POST', 'GET')
+    array('POST')
+));
+
+$routes->add('signup', new Route(
+    constant('URL_SUBFOLDER') . '/signup',
+    array('controller' => 'PageController', 'method'=>'signup'),
+    array(),
+    array(),
+    '',
+    array(),
+    array('GET')
 ));
 
 $routes->add('signin', new Route(

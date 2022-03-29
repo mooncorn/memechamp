@@ -2,10 +2,12 @@
 
 namespace App\Controllers;
 
+use App\Framework\Exceptions\InvalidFieldValueException;
 use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\Enums\GetUserBy;
 use App\Models\User;
+use App\Services\UserService;
 
 class UserController
 {
@@ -25,58 +27,29 @@ class UserController
 
     public function signup()
     {
-        $errors = array();
+        $_SESSION["form_signup"] = [];
+        $username = filter_input(INPUT_POST, 'username');
+        $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+        $password = filter_input(INPUT_POST, 'password');
 
-        if (!empty($_POST))
+        if ($username && $email && $password)
         {
-            $username = filter_input(INPUT_POST, 'username');
-            $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-            $password = filter_input(INPUT_POST, 'password');
+            $_SESSION["form_signup"][] = ["values" => ["username" => $username, "email" => $email, "password" => $password]];
 
-            // check required fields
-            if (!$username)
+            try
             {
-                $errors["username"] = "Username is required";
-            }
-            if (!$email)
-            {
-                $errors["email"] = "Email is invalid";
-            }
-            if (!$password)
-            {
-                $errors["password"] = "Password is required";
-            }
+                UserService::createUser($username, $email, $password);
 
-            // check unique fields
-            if (!isset($errors['email']))
-            {
-                if (User::exists(GetUserBy::EMAIL, $email))
-                {
-                    $errors['email'] = 'Email is taken';
-                }
-            }
-            if (!isset($errors['username']))
-            {
-                if (User::exists(GetUserBy::USERNAME, $username))
-                {
-                    $errors['username'] = "Username is taken";
-                }
-            }
+                $_SESSION["form_signup"] = [];
 
-            if (empty($errors))
-            {
-                $user = User::build($username, $email, $password)->save();
-                $user->load(GetUserBy::USERNAME, $username);
-
-                // add user info to the current session
-                Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
-
-                // redirect to homepage
                 Routing::redirectToPage('homepage');
             }
+            catch (InvalidFieldValueException $e)
+            {
+                $_SESSION["form_signup"][] = ["error" => $e->getMessage()];
+                Routing::redirectToPage('signup');
+            }
         }
-
-        require_once APP_ROOT . '/views/Signup.php';
     }
 
     public function signin()

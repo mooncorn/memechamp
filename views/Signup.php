@@ -1,8 +1,11 @@
 <?php
+
+use App\Helpers\Routing;
+
 include 'Header.php';
 
 /**
- * @var RouteCollection $routes
+ * @var Routing
  * @var array $errors
  * @var string $username;
  * @var string $email;
@@ -23,28 +26,31 @@ include 'Header.php';
 
 <section class="mx-auto">
     <h1 class="text-center">Sign Up</h1>
-    <form enctype="multipart/form-data" action="signup" method="post">
+
+    <?php if (isset($_SESSION["form_signup"]["error"])) { ?>
+    <div class="alert alert-danger" role="alert">
+        <?= $_SESSION["form_signup"]["error"] ?? "" ?>
+    </div>
+    <?php } ?>
+
+    <form action="api/signup" method="post">
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" value="<?= $username ?? '' ?>">
-            <div class="text-danger"><?= $errors["username"] ?? "" ?></div>
+            <input type="text" name="username" class="form-control" value="<?= $_SESSION["form_signup"]["values"]["username"] ?? '' ?>">
+
         </div>
         <div class="mb-3">
             <label for="email" class="form-label">Email Address</label>
-            <input type="email" name="email" class="form-control" value="<?= $email ?? '' ?>">
-            <div class="text-danger"><?= $errors["email"] ?? "" ?></div>
+            <input type="email" name="email" class="form-control" value="<?= $_SESSION["form_signup"]["values"]["email"] ?? '' ?>">
+
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" value="<?= $password ?? '' ?>">
-            <div class="text-danger"><?= $errors["password"] ?? "" ?></div>
+            <input type="password" name="password" class="form-control" value="<?= $_SESSION["form_signup"]["values"]["password"] ?? '' ?>">
+
         </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
-        <div class="text-danger"><?= $errors["main"] ?? "" ?></div>
+
     </form>
-
-
-
-    <a href="<?php echo $routes->get('homepage')->getPath(); ?>">Back to homepage</a>
 <section>
 <?php include 'Footer.php'; ?>
