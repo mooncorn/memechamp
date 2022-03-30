@@ -2,11 +2,18 @@
 
 use App\Helpers\Routing;
 
+/**
+ * @var int $id
+ * @var string $status
+ */
+
 include 'Header.php';
 
+$fulfilled = $status == 'fulfilled';
+$rejected = $status == 'rejected';
+
 /**
- * @var array $errors
- * @var array $messages
+ * @var int $id
  */
 
 ?>
@@ -25,12 +32,15 @@ include 'Header.php';
 <hr>
     <div class="p-2 my-2 border rounded">
         <h3>Update Username</h3>
-        <form enctype="multipart/form-data" action="edit" method="post">
+        <form enctype="multipart/form-data" action="/<?=constant('URL_SUBFOLDER')?>/api/update/user/<?=$id?>/username" method="post">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" name="username" class="form-control" value="<?= $username ?? '' ?>">
-                <div class="text-success"><?= $messages["username"] ?? "" ?></div>
-                <div class="text-danger"><?= $errors["username"] ?? "" ?></div>
+                <?php if ($fulfilled) { ?>
+                    <div class="text-success"><?= $_SESSION['form_update_username'] ?? "" ?></div>
+                <?php } else if ($rejected) { ?>
+                    <div class="text-danger"><?= $_SESSION['form_update_username'] ?? "" ?></div>
+                <?php } ?>
             </div>
             <button type="submit" class="btn btn-primary">Update</button>
         </form>

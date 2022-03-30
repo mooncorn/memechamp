@@ -58,8 +58,8 @@ class User {
         {
             if ($this->id != 0)
             {
-                $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, current_poggers=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
-                $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->current_poggers, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
+                $stmt = $pdo->prepare("UPDATE user SET username=?, email=?, password=?, pfp=?, max_poggers=?, is_banned=?, is_admin=? WHERE id=?");
+                $stmt->execute([$this->username, $this->email, $this->password, $this->pfp, $this->max_poggers, $this->is_banned, $this->is_admin, $this->id]);
             }
             else
             {

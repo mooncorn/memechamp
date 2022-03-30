@@ -10,10 +10,10 @@ include 'Header.php';
  * @var Auth
  * @var Routing
  * @var string $tab
- * @var string $id
+ * @var string $userId
  */
 
-$user = User::fetch($id);
+$user = User::fetch($userId);
 
 function renderComments(User $user)
 {

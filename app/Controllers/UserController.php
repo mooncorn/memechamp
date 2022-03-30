@@ -7,6 +7,7 @@ use App\Helpers\Routing;
 use App\Models\Enums\GetUserBy;
 use App\Models\User;
 use App\Services\UserService;
+use Exception;
 
 class UserController
 {
@@ -54,6 +55,50 @@ class UserController
     {
         Auth::clearSession();
         Routing::redirectToPage('homepage');
+    }
+
+    /**
+     * @Route("/api/update/user/{id}/username", name="handle_username_update", method="POST")
+     */
+    public function update_username(int $id)
+    {
+        $_SESSION['form_update_username'] = '';
+
+        $username = filter_input(INPUT_POST, 'username');
+
+        if (Auth::isOwner($id))
+        {
+            try
+            {
+                $user = User::fetch($id);
+                $user->setUsername($username);
+                $user->save();
+
+                Auth::setSession(['username' => $username]);
+                $_SESSION['form_update_username'] = 'Username updated successfully';
+
+                Routing::redirectToCustomPage('edit_profile', ['id'=>$id, 'status'=>'fulfilled']);
+            }
+            catch (Exception $e)
+            {
+                $_SESSION['form_update_username'] = $e->getMessage();
+
+                Routing::redirectToCustomPage('edit_profile', ['id'=>$id, 'status'=>'rejected']);
+            }
+        }
+        else
+        {
+            require_once APP_ROOT . '/views/Unauthorized.php';
+        }
+    }
+
+    /**
+     * @Route("/api/update/user/{id}/pfp", name="handle_pfp_update", method="POST")
+     */
+    public function update_pfp(int $id)
+    {
+        $_SESSION['form_update_pfp'] = [];
+
     }
 
     public function edit_profile(int $id)

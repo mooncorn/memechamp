@@ -22,8 +22,7 @@ class PageController
      */
     public function profile(int $userId, string $tab)
     {
-        $id = filter_var($userId, FILTER_SANITIZE_NUMBER_INT);
-        if (User::exists(GetUserBy::ID, $id))
+        if (User::exists(GetUserBy::ID, $userId))
         {
             require_once APP_ROOT . '/views/Profile.php';
         }
@@ -47,5 +46,17 @@ class PageController
     public function signin(string $status)
     {
         require_once APP_ROOT . '/views/Signin.php';
+    }
+
+    /**
+     * @Route("/edit/user/{id}/{status}", name="edit_profile", method="GET")
+     */
+    public function editProfile(int $id, string $status)
+    {
+        echo "<pre>";
+        print_r($_SESSION);
+        echo "</pre>";
+
+        require_once APP_ROOT . '/views/EditProfile.php';
     }
 }
