@@ -61,10 +61,12 @@ class UserController
         }
     }
 
+    /**
+     * @Route("/api/signout", name="handle_signout", method="GET")
+     */
     public function signout()
     {
         Auth::clearSession();
-
         Routing::redirectToPage('homepage');
     }
 

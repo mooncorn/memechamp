@@ -28,9 +28,6 @@ class PageController
      */
     public function signin(string $status)
     {
-        echo "<pre>";
-        print_r($_SESSION);
-        echo "</pre>";
         require_once APP_ROOT . '/views/Signin.php';
     }
 }

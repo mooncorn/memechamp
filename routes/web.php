@@ -46,7 +46,7 @@ $routes->add('signin', new Route(
 ));
 
 $routes->add('signout', new Route(
-    constant('URL_SUBFOLDER') . '/signout',
+    constant('URL_SUBFOLDER') . '/api/signout',
     array('controller' => 'UserController', 'method'=>'signout')
 ));
 
