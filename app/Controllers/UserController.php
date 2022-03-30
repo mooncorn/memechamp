@@ -10,18 +10,6 @@ use App\Services\UserService;
 
 class UserController
 {
-	public function profile(int $userId, string $tab)
-    {
-        if (User::exists(GetUserBy::ID, $userId))
-        {
-            require_once APP_ROOT . '/views/Profile.php';
-        }
-        else
-        {
-            require_once APP_ROOT . '/views/404.php';
-        }
-	}
-
     /**
      * @Route("/api/signup", name="handle_signup", method="POST")
      */

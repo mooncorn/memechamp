@@ -9,10 +9,11 @@ include 'Header.php';
 /**
  * @var Auth
  * @var Routing
- * @var User $user
  * @var string $tab
- * @var array $comments
+ * @var string $id
  */
+
+$user = User::fetch($id);
 
 function renderComments(User $user)
 {

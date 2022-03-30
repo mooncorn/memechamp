@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Helpers\Routing;
+use App\Models\Enums\GetUserBy;
+use App\Models\User;
 use App\Models\Vote;
 
 class PageController
@@ -13,6 +15,22 @@ class PageController
 	public function homepage()
 	{
         require_once APP_ROOT . '/views/Feed.php';
+    }
+
+    /**
+     * @Route("/user/{userId}/{tab}", name="profile", method="GET")
+     */
+    public function profile(int $userId, string $tab)
+    {
+        $id = filter_var($userId, FILTER_SANITIZE_NUMBER_INT);
+        if (User::exists(GetUserBy::ID, $id))
+        {
+            require_once APP_ROOT . '/views/Profile.php';
+        }
+        else
+        {
+            require_once APP_ROOT . '/views/404.php';
+        }
     }
 
     /**

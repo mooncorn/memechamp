@@ -52,7 +52,7 @@ $routes->add('signout', new Route(
 
 $routes->add('profile', new Route(
     constant('URL_SUBFOLDER') . '/user/{userId}/{tab}',
-    array('controller' => 'UserController', 'method'=>'profile', 'tab'=>'posts'),
+    array('controller' => 'PageController', 'method'=>'profile', 'tab'=>'posts'),
     array('id' => '[0-9]+'),
     array(),
     '',
