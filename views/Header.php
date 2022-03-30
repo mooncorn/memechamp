@@ -71,7 +71,7 @@ use App\Helpers\Routing;
                     </li>
                 <?php } else { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Routing::getUrlTo('signup') ?>">Sign Up</a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('signup', ['status'=>'']) ?>">Sign Up</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Routing::getUrlTo('signin') ?>">Sign In</a>

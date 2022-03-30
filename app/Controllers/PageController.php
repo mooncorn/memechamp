@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Helpers\Routing;
 use App\Models\Vote;
 
 class PageController
@@ -11,7 +12,7 @@ class PageController
         require_once APP_ROOT . '/views/Feed.php';
     }
 
-    public function signup()
+    public function signup(string $status)
     {
         require_once APP_ROOT . '/views/Signup.php';
     }

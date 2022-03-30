@@ -81,18 +81,6 @@ class User {
         return (bool) $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
     }
 
-    /**
-     * @throws InvalidFieldValueException
-     */
-    public static function build(string $username, string $email, string $password): User
-    {
-        $user = new User();
-        $user->setUsername($username);
-        $user->setEmail($email);
-        $user->setPassword($password);
-        return $user;
-    }
-
     public static function fetch(int $id): ?User
     {
         $user = new User();
@@ -167,6 +155,14 @@ class User {
      */
     public function setEmail(string $email): void
     {
+        if (!$email) {
+            throw new InvalidFieldValueException("Email is required", "email");
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidFieldValueException("Email is invalid", "email");
+        }
+
         if (User::exists(GetUserBy::EMAIL, $email)) {
             throw new InvalidFieldValueException("Account with this email already exists", "email");
         }
@@ -188,6 +184,14 @@ class User {
      */
     public function setUsername(string $username): void
     {
+        if (!$username) {
+            throw new InvalidFieldValueException("Username is required", "username");
+        }
+
+        if (strlen($username) < 3 || strlen($username) > 20) {
+            throw new InvalidFieldValueException("Username needs to be between 3-20 characters long", "username");
+        }
+
         if (User::exists(GetUserBy::USERNAME, $username)) {
             throw new InvalidFieldValueException("Account with this username already exists", "username");
         }
@@ -205,9 +209,18 @@ class User {
 
     /**
      * @param string $password
+     * @throws InvalidFieldValueException
      */
     public function setPassword(string $password): void
     {
+        if (!$password) {
+            throw new InvalidFieldValueException("Password is required", "password");
+        }
+
+        if (strlen($password) < 3 || strlen($password) > 20) {
+            throw new InvalidFieldValueException("Password needs to be between 3-20 characters long", "password");
+        }
+
         $this->password = $password;
     }
 

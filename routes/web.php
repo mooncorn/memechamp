@@ -26,13 +26,9 @@ $routes->add('handle_signup', new Route(
 ));
 
 $routes->add('signup', new Route(
-    constant('URL_SUBFOLDER') . '/signup',
-    array('controller' => 'PageController', 'method'=>'signup'),
-    array(),
-    array(),
-    '',
-    array(),
-    array('GET')
+    constant('URL_SUBFOLDER') . '/signup/{status}',
+    array('controller' => 'PageController', 'method'=>'signup', 'status'=>''),
+    array('status'=>'(rejected)?')
 ));
 
 $routes->add('signin', new Route(
@@ -53,7 +49,7 @@ $routes->add('signout', new Route(
 $routes->add('profile', new Route(
     constant('URL_SUBFOLDER') . '/user/{id}/{tab}',
     array('controller' => 'UserController', 'method'=>'profile', 'tab'=>'posts'),
-    array(),
+    array('id' => '[0-9]+'),
     array(),
     '',
     array(),

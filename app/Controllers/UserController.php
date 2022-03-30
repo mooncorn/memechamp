@@ -27,28 +27,64 @@ class UserController
 
     public function signup()
     {
-        $_SESSION["form_signup"] = [];
-        $username = filter_input(INPUT_POST, 'username');
-        $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-        $password = filter_input(INPUT_POST, 'password');
+        // Create default form signup state
+        $_SESSION['form_signup'] = [
+            'values' => [],
+            'errors' => []
+        ];
 
-        if ($username && $email && $password)
+        $user = new User();
+
+        // VALIDATE USERNAME
+        try
         {
-            $_SESSION["form_signup"][] = ["values" => ["username" => $username, "email" => $email, "password" => $password]];
+            $username = filter_input(INPUT_POST, 'username');
+            $_SESSION['form_signup']['values']['username'] = $username;
+            $user->setUsername($username);
+        }
+        catch (InvalidFieldValueException $e)
+        {
+            $_SESSION["form_signup"]['errors']['username'] = $e->getMessage();
+        }
 
-            try
-            {
-                UserService::createUser($username, $email, $password);
+        // VALIDATE EMAIL
+        try
+        {
+            $email = filter_input(INPUT_POST, 'email');
+            $_SESSION['form_signup']['values']['email'] = $email;
+            $user->setEmail($email);
+        }
+        catch (InvalidFieldValueException $e)
+        {
+            $_SESSION["form_signup"]['errors']['email'] = $e->getMessage();
+        }
 
-                $_SESSION["form_signup"] = [];
+        // VALIDATE PASSWORD
+        try
+        {
+            $password = filter_input(INPUT_POST, 'password');
+            $_SESSION['form_signup']['values']['password'] = $password;
+            $user->setPassword($password);
+        }
+        catch (InvalidFieldValueException $e)
+        {
+            $_SESSION["form_signup"]['errors']['password'] = $e->getMessage();
+        }
 
-                Routing::redirectToPage('homepage');
-            }
-            catch (InvalidFieldValueException $e)
-            {
-                $_SESSION["form_signup"][] = ["error" => $e->getMessage()];
-                Routing::redirectToPage('signup');
-            }
+        if (empty($_SESSION['form_signup']['errors']))
+        {
+            $user->save();
+
+            $user->load(GetUserBy::USERNAME, $username);
+
+            $_SESSION['username'] = $user->getUsername();
+            $_SESSION['id'] = $user->getId();
+
+            Routing::redirectToPage('homepage');
+        }
+        else
+        {
+            Routing::redirectToCustomPage('signup', ['status'=>'rejected']);
         }
     }
 
