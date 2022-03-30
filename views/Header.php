@@ -64,7 +64,7 @@ use App\Helpers\Routing;
             <ul class="navbar-nav ms-auto align-items-center">
                 <?php if (Auth::isAuthenticated()) { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['id' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['userId' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Routing::getUrlTo('signout') ?>">Sign Out</a>
@@ -74,7 +74,7 @@ use App\Helpers\Routing;
                         <a class="nav-link" href="<?= Routing::getCustomUrlTo('signup', ['status'=>'']) ?>">Sign Up</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Routing::getUrlTo('signin') ?>">Sign In</a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('signin', ['status'=>'']) ?>">Sign In</a>
                     </li>
                 <?php } ?>
             </ul>

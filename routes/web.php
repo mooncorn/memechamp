@@ -27,18 +27,22 @@ $routes->add('handle_signup', new Route(
 
 $routes->add('signup', new Route(
     constant('URL_SUBFOLDER') . '/signup/{status}',
-    array('controller' => 'PageController', 'method'=>'signup', 'status'=>''),
-    array('status'=>'(rejected)?')
+    array('controller' => 'PageController', 'method'=>'signup', 'status'=>'')
 ));
 
-$routes->add('signin', new Route(
-    constant('URL_SUBFOLDER') . '/signin',
+$routes->add('handle_signin', new Route(
+    constant('URL_SUBFOLDER') . '/api/signin',
     array('controller' => 'UserController', 'method'=>'signin'),
     array(),
     array(),
     '',
     array(),
-    array('POST', 'GET')
+    array('POST')
+));
+
+$routes->add('signin', new Route(
+    constant('URL_SUBFOLDER') . '/signin/{status}',
+    array('controller' => 'PageController', 'method'=>'signin', 'status'=>'')
 ));
 
 $routes->add('signout', new Route(
@@ -47,7 +51,7 @@ $routes->add('signout', new Route(
 ));
 
 $routes->add('profile', new Route(
-    constant('URL_SUBFOLDER') . '/user/{id}/{tab}',
+    constant('URL_SUBFOLDER') . '/user/{userId}/{tab}',
     array('controller' => 'UserController', 'method'=>'profile', 'tab'=>'posts'),
     array('id' => '[0-9]+'),
     array(),

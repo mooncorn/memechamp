@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Framework\Exceptions\InvalidFieldValueException;
 use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\Enums\GetUserBy;
@@ -11,9 +10,9 @@ use App\Services\UserService;
 
 class UserController
 {
-	public function profile(int $id, string $tab)
+	public function profile(int $userId, string $tab)
     {
-        $user = User::fetch($id);
+        $user = User::fetch($userId);
 
         if ($user)
         {
@@ -25,61 +24,17 @@ class UserController
         }
 	}
 
+    /**
+     * @Route("/api/signup", name="handle_signup", method="POST")
+     */
     public function signup()
     {
-        // Create default form signup state
-        $_SESSION['form_signup'] = [
-            'values' => [],
-            'errors' => []
-        ];
+        $username = filter_input(INPUT_POST, 'username');
+        $email = filter_input(INPUT_POST, 'email');
+        $password = filter_input(INPUT_POST, 'password');
 
-        $user = new User();
-
-        // VALIDATE USERNAME
-        try
+        if (UserService::signup($username, $email, $password))
         {
-            $username = filter_input(INPUT_POST, 'username');
-            $_SESSION['form_signup']['values']['username'] = $username;
-            $user->setUsername($username);
-        }
-        catch (InvalidFieldValueException $e)
-        {
-            $_SESSION["form_signup"]['errors']['username'] = $e->getMessage();
-        }
-
-        // VALIDATE EMAIL
-        try
-        {
-            $email = filter_input(INPUT_POST, 'email');
-            $_SESSION['form_signup']['values']['email'] = $email;
-            $user->setEmail($email);
-        }
-        catch (InvalidFieldValueException $e)
-        {
-            $_SESSION["form_signup"]['errors']['email'] = $e->getMessage();
-        }
-
-        // VALIDATE PASSWORD
-        try
-        {
-            $password = filter_input(INPUT_POST, 'password');
-            $_SESSION['form_signup']['values']['password'] = $password;
-            $user->setPassword($password);
-        }
-        catch (InvalidFieldValueException $e)
-        {
-            $_SESSION["form_signup"]['errors']['password'] = $e->getMessage();
-        }
-
-        if (empty($_SESSION['form_signup']['errors']))
-        {
-            $user->save();
-
-            $user->load(GetUserBy::USERNAME, $username);
-
-            $_SESSION['username'] = $user->getUsername();
-            $_SESSION['id'] = $user->getId();
-
             Routing::redirectToPage('homepage');
         }
         else
@@ -88,54 +43,22 @@ class UserController
         }
     }
 
+    /**
+     * @Route("/api/signin", name="handle_signin", method="POST")
+     */
     public function signin()
     {
-        $errors = array();
+        $username = filter_input(INPUT_POST, 'username');
+        $password = filter_input(INPUT_POST, 'password');
 
-        if (!empty($_POST))
+        if (UserService::signin($username, $password))
         {
-            $username = filter_input(INPUT_POST, 'username');
-            $password = filter_input(INPUT_POST, 'password');
-
-            // check required fields
-            if (!$username)
-            {
-                $errors["username"] = "Username is required";
-            }
-            if (!$password)
-            {
-                $errors["password"] = "Password is required";
-            }
-
-            if (empty($errors))
-            {
-                $user = new User();
-
-                // if user with provided username was found
-                if ($user->load(GetUserBy::USERNAME, $username))
-                {
-                    // verify if the passwords match
-                    if ($user->getPassword() == $password)
-                    {
-                        // add user info to the current session
-                        Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
-
-                        // redirect to homepage
-                        Routing::redirectToPage('homepage');
-                    }
-                    else
-                    {
-                        $errors["main"] = "Invalid credentials";
-                    }
-                }
-                else
-                {
-                    $errors["main"] = "Invalid credentials";
-                }
-            }
+            Routing::redirectToPage('homepage');
         }
-
-        require_once APP_ROOT . '/views/Signin.php';
+        else
+        {
+            Routing::redirectToCustomPage('signin', ['status'=>'rejected']);
+        }
     }
 
     public function signout()
