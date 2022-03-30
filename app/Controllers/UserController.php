@@ -12,9 +12,7 @@ class UserController
 {
 	public function profile(int $userId, string $tab)
     {
-        $user = User::fetch($userId);
-
-        if ($user)
+        if (User::exists(GetUserBy::ID, $userId))
         {
             require_once APP_ROOT . '/views/Profile.php';
         }
