@@ -113,16 +113,16 @@ function renderLiked(User $user)
 
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link <?= $tab == 'posts' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId()]) ?>">Posts</a>
+                <a class="nav-link <?= $tab == 'posts' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['userId' => $user->getId()]) ?>">Posts</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= $tab == 'comments' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId(), 'tab' => 'comments']) ?>">Comments</a>
+                <a class="nav-link <?= $tab == 'comments' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['userId' => $user->getId(), 'tab' => 'comments']) ?>">Comments</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= $tab == 'voted' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId(), 'tab' => 'voted']) ?>">Voted</a>
+                <a class="nav-link <?= $tab == 'voted' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['userId' => $user->getId(), 'tab' => 'voted']) ?>">Voted</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?= $tab == 'liked' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['id' => $user->getId(), 'tab' => 'liked']) ?>">Liked</a>
+                <a class="nav-link <?= $tab == 'liked' ? 'active' : '' ?>" href="<?= Routing::getCustomUrlTo('profile', ['userId' => $user->getId(), 'tab' => 'liked']) ?>">Liked</a>
             </li>
         </ul>
 

@@ -57,7 +57,7 @@ function show_comment($comment, $level = 0) {
                         <?php if ($comment->isDeleted()) { ?>
                             <a href="#">[deleted]</a>
                         <?php } else { ?>
-                            <a href="<?= Routing::getCustomUrlTo('profile', ['id'=>$owner->getId()]) ?>"><?= $owner->getUsername() ?></a>
+                            <a href="<?= Routing::getCustomUrlTo('profile', ['userId'=>$owner->getId()]) ?>"><?= $owner->getUsername() ?></a>
                         <?php } ?>
                     </h5>
                     <small class="p-1"><?= $comment->getCreatedAt() ?></small>
