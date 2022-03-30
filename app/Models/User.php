@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Framework\Exceptions\InvalidFieldValueException;
 use App\Helpers\DBConnection;
 use App\Models\Enums\GetUserBy;
 use Exception;
+use PDOException;
 
 class User {
     private int $id;
@@ -12,7 +14,6 @@ class User {
     private string $username;
     private string $password;
     private string $pfp;
-    private int $current_poggers;
     private int $max_poggers;
     private bool $is_banned;
     private bool $is_admin;
@@ -25,7 +26,6 @@ class User {
         $this->username = "";
         $this->password = "";
         $this->pfp = "";
-        $this->current_poggers = 0;
         $this->max_poggers = 0;
         $this->is_banned = false;
         $this->is_admin = false;
@@ -44,7 +44,6 @@ class User {
         $this->username = $row["username"];
         $this->password = $row["password"];
         $this->pfp = $row["pfp"];
-        $this->current_poggers = $row["current_poggers"];
         $this->max_poggers = $row["max_poggers"];
         $this->is_banned = $row["is_banned"];
         $this->is_admin = $row["is_admin"];
@@ -52,7 +51,7 @@ class User {
         return $this;
     }
 
-    public function save(): ?User
+    public function save(): User|string
     {
         $pdo = DBConnection::getDB();
         try
@@ -70,9 +69,9 @@ class User {
 
             return $this;
         }
-        catch (Exception $e)
+        catch (PDOException $e)
         {
-            return null;
+            return $e->getMessage();
         }
     }
 
@@ -80,15 +79,6 @@ class User {
     {
         $pdo = DBConnection::getDB();
         return (bool) $pdo->query("SELECT * FROM user WHERE $column->value='$value'")->fetch();
-    }
-
-    public static function build(string $username, string $email, string $password): User
-    {
-        $user = new User();
-        $user->setUsername($username);
-        $user->setEmail($email);
-        $user->setPassword($password);
-        return $user;
     }
 
     public static function fetch(int $id): ?User
@@ -108,6 +98,30 @@ class User {
         }
 
         return $comments;
+    }
+
+    public function getPosts(): array
+    {
+        $pdo = DBConnection::getDB();
+        $posts = [];
+        $stmt = $pdo->query("SELECT id FROM post WHERE user_id=$this->id");
+
+        while ($row = $stmt->fetch()) {
+            $post = new Post();
+            $post->load($row["id"]);
+            $posts[] = $post;
+        }
+
+        return $posts;
+    }
+
+    public function getRemainingPoggers(): int
+    {
+        $pdo = DBConnection::getDB();
+        $result = $pdo->query("SELECT SUM(amount) FROM vote, post, competition WHERE vote.user_id=$this->id AND vote.post_id=post.id AND post.comp_id=competition.id AND competition.is_active=true")->fetch();
+
+        $sumOfVotes = $result["SUM(amount)"] ?? 0;
+        return $this->max_poggers - $sumOfVotes;
     }
 
     #region Getters & Setters
@@ -137,9 +151,22 @@ class User {
 
     /**
      * @param string $email
+     * @throws InvalidFieldValueException
      */
     public function setEmail(string $email): void
     {
+        if (!$email) {
+            throw new InvalidFieldValueException("Email is required", "email");
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidFieldValueException("Email is invalid", "email");
+        }
+
+        if (User::exists(GetUserBy::EMAIL, $email)) {
+            throw new InvalidFieldValueException("Account with this email already exists", "email");
+        }
+
         $this->email = $email;
     }
 
@@ -153,9 +180,22 @@ class User {
 
     /**
      * @param string $username
+     * @throws InvalidFieldValueException
      */
     public function setUsername(string $username): void
     {
+        if (!$username) {
+            throw new InvalidFieldValueException("Username is required", "username");
+        }
+
+        if (strlen($username) < 3 || strlen($username) > 20) {
+            throw new InvalidFieldValueException("Username needs to be between 3-20 characters long", "username");
+        }
+
+        if (User::exists(GetUserBy::USERNAME, $username)) {
+            throw new InvalidFieldValueException("Account with this username already exists", "username");
+        }
+
         $this->username = $username;
     }
 
@@ -169,9 +209,18 @@ class User {
 
     /**
      * @param string $password
+     * @throws InvalidFieldValueException
      */
     public function setPassword(string $password): void
     {
+        if (!$password) {
+            throw new InvalidFieldValueException("Password is required", "password");
+        }
+
+        if (strlen($password) < 3 || strlen($password) > 20) {
+            throw new InvalidFieldValueException("Password needs to be between 3-20 characters long", "password");
+        }
+
         $this->password = $password;
     }
 
@@ -189,22 +238,6 @@ class User {
     public function setPfp(string $pfp): void
     {
         $this->pfp = $pfp;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCurrentPoggers(): int
-    {
-        return $this->current_poggers;
-    }
-
-    /**
-     * @param int $current_poggers
-     */
-    public function setCurrentPoggers(int $current_poggers): void
-    {
-        $this->current_poggers = $current_poggers;
     }
 
     /**

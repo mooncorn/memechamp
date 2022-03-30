@@ -5,11 +5,14 @@ use App\Helpers\Routing;
 use App\Models\Comment;
 use App\Models\Enums\ReplyTarget;
 use App\Models\Like;
+use App\Models\User;
+use App\Models\Vote;
 
 include 'Header.php';
 
 /**
  * @var int $postId
+ * @var User|null $user
  */
 
 
@@ -54,7 +57,7 @@ function show_comment($comment, $level = 0) {
                         <?php if ($comment->isDeleted()) { ?>
                             <a href="#">[deleted]</a>
                         <?php } else { ?>
-                            <a href="<?= Routing::getCustomUrlTo('profile', ['id'=>$owner->getId()]) ?>"><?= $owner->getUsername() ?></a>
+                            <a href="<?= Routing::getCustomUrlTo('profile', ['userId'=>$owner->getId()]) ?>"><?= $owner->getUsername() ?></a>
                         <?php } ?>
                     </h5>
                     <small class="p-1"><?= $comment->getCreatedAt() ?></small>
@@ -104,7 +107,29 @@ function show_comment($comment, $level = 0) {
 </style>
 
 <section class="mx-auto">
-    <p><a href="<?= Routing::getCustomUrlTo('reply_to_post', ['id'=>$postId]) ?>">Create a comment</a></p>
+
+    <p>
+        [POST <?= $postId ?>]
+        Number of poggers: <?= Vote::getTotalVotesForPost($postId) ?>
+    </p>
+
+    <hr>
+
+    <div class="d-flex align-items-center">
+        <a href="<?= Routing::getCustomUrlTo('reply_to_post', ['id'=>$postId]) ?>">Create a comment</a>
+
+        <?php if (Auth::isAuthenticated()) {
+            $amountOfVotes = Vote::getVoteAmount($postId, Auth::get('id'));
+            $formAction = "/" . constant('URL_SUBFOLDER') . "/vote/post/" . $postId . "/user/" . Auth::get('id');
+            $remainingPoggers = $user->getRemainingPoggers();
+            ?>
+        <form method="post" action="<?= $formAction ?>" class="d-flex align-items-center ms-auto">
+            <input style="width: 80px" class="form-control border-none" value="<?= $amountOfVotes ?>" type="number" name="amount" min="1" max="<?= $remainingPoggers + $amountOfVotes ?>" required/>
+            <button class="btn btn-primary ms-2" type="submit">POG</button>
+        </form>
+        <?php } ?>
+    </div>
+
     <div class="card">
         <div class="card-header">
             <h1>Comments</h1>

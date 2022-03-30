@@ -6,20 +6,16 @@ use App\Helpers\Auth;
 use App\Helpers\Routing;
 use App\Models\Enums\GetUserBy;
 use App\Models\User;
+use App\Services\UserService;
 
 class UserController
 {
-	public function profile(int $id, string $tab)
+	public function profile(int $userId, string $tab)
     {
-        $user = User::fetch($id);
+        $user = User::fetch($userId);
 
         if ($user)
         {
-            if ($tab == "comments")
-            {
-                $comments = $user->getComments();
-            }
-
             require_once APP_ROOT . '/views/Profile.php';
         }
         else
@@ -28,116 +24,49 @@ class UserController
         }
 	}
 
+    /**
+     * @Route("/api/signup", name="handle_signup", method="POST")
+     */
     public function signup()
     {
-        $errors = array();
+        $username = filter_input(INPUT_POST, 'username');
+        $email = filter_input(INPUT_POST, 'email');
+        $password = filter_input(INPUT_POST, 'password');
 
-        if (!empty($_POST))
+        if (UserService::signup($username, $email, $password))
         {
-            $username = filter_input(INPUT_POST, 'username');
-            $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-            $password = filter_input(INPUT_POST, 'password');
-
-            // check required fields
-            if (!$username)
-            {
-                $errors["username"] = "Username is required";
-            }
-            if (!$email)
-            {
-                $errors["email"] = "Email is invalid";
-            }
-            if (!$password)
-            {
-                $errors["password"] = "Password is required";
-            }
-
-            // check unique fields
-            if (!isset($errors['email']))
-            {
-                if (User::exists(GetUserBy::EMAIL, $email))
-                {
-                    $errors['email'] = 'Email is taken';
-                }
-            }
-            if (!isset($errors['username']))
-            {
-                if (User::exists(GetUserBy::USERNAME, $username))
-                {
-                    $errors['username'] = "Username is taken";
-                }
-            }
-
-            if (empty($errors))
-            {
-                $user = User::build($username, $email, $password)->save();
-                $user->load(GetUserBy::USERNAME, $username);
-
-                // add user info to the current session
-                Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
-
-                // redirect to homepage
-                Routing::redirectToPage('homepage');
-            }
+            Routing::redirectToPage('homepage');
         }
-
-        require_once APP_ROOT . '/views/Signup.php';
+        else
+        {
+            Routing::redirectToCustomPage('signup', ['status'=>'rejected']);
+        }
     }
 
+    /**
+     * @Route("/api/signin", name="handle_signin", method="POST")
+     */
     public function signin()
     {
-        $errors = array();
+        $username = filter_input(INPUT_POST, 'username');
+        $password = filter_input(INPUT_POST, 'password');
 
-        if (!empty($_POST))
+        if (UserService::signin($username, $password))
         {
-            $username = filter_input(INPUT_POST, 'username');
-            $password = filter_input(INPUT_POST, 'password');
-
-            // check required fields
-            if (!$username)
-            {
-                $errors["username"] = "Username is required";
-            }
-            if (!$password)
-            {
-                $errors["password"] = "Password is required";
-            }
-
-            if (empty($errors))
-            {
-                $user = new User();
-
-                // if user with provided username was found
-                if ($user->load(GetUserBy::USERNAME, $username))
-                {
-                    // verify if the passwords match
-                    if ($user->getPassword() == $password)
-                    {
-                        // add user info to the current session
-                        Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
-
-                        // redirect to homepage
-                        Routing::redirectToPage('homepage');
-                    }
-                    else
-                    {
-                        $errors["main"] = "Invalid credentials";
-                    }
-                }
-                else
-                {
-                    $errors["main"] = "Invalid credentials";
-                }
-            }
+            Routing::redirectToPage('homepage');
         }
-
-        require_once APP_ROOT . '/views/Signin.php';
+        else
+        {
+            Routing::redirectToCustomPage('signin', ['status'=>'rejected']);
+        }
     }
 
+    /**
+     * @Route("/api/signout", name="handle_signout", method="GET")
+     */
     public function signout()
     {
         Auth::clearSession();
-
         Routing::redirectToPage('homepage');
     }
 

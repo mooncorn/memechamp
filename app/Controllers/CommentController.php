@@ -44,6 +44,9 @@ class CommentController
     public function comments(int $id)
     {
         $postId = $id;
+        if (Auth::isAuthenticated()) {
+            $user = User::fetch(Auth::get('id'));
+        }
         require_once APP_ROOT . '/views/Comments.php';
     }
 
@@ -154,8 +157,6 @@ class CommentController
             Routing::redirectToPage('signin');
             return;
         }
-
-        print_r('ok');
 
         if (Like::exists(Auth::get('id'), $id))
         {

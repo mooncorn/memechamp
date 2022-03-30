@@ -1,13 +1,27 @@
 <?php
+
+use App\Helpers\Routing;
+
 include 'Header.php';
 
 /**
- * @var RouteCollection $routes
- * @var array $errors
- * @var string $username;
- * @var string $email;
- * @var string $password;
+ * @var Routing
+ * @var string $status
  */
+
+if ($status == 'rejected') {
+    $values = $_SESSION['form_signup']['values'];
+    $errors = $_SESSION['form_signup']['errors'];
+
+    $username = $values['username'] ?? '';
+    $username_error = $errors['username'] ?? '';
+
+    $email = $values['email'] ?? '';
+    $email_error = $errors['email'] ?? '';
+
+    $password = $values['password'] ?? '';
+    $password_error = $errors['password'] ?? '';
+}
 
 ?>
 
@@ -23,28 +37,25 @@ include 'Header.php';
 
 <section class="mx-auto">
     <h1 class="text-center">Sign Up</h1>
-    <form enctype="multipart/form-data" action="signup" method="post">
+
+    <form action="/<?=constant('URL_SUBFOLDER')?>/api/signup" method="post">
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
             <input type="text" name="username" class="form-control" value="<?= $username ?? '' ?>">
-            <div class="text-danger"><?= $errors["username"] ?? "" ?></div>
+            <div class="text-danger"><?= $username_error ?? '' ?></div>
         </div>
         <div class="mb-3">
             <label for="email" class="form-label">Email Address</label>
-            <input type="email" name="email" class="form-control" value="<?= $email ?? '' ?>">
-            <div class="text-danger"><?= $errors["email"] ?? "" ?></div>
+            <input type="text" name="email" class="form-control" value="<?= $email ?? '' ?>">
+            <div class="text-danger"><?= $email_error ?? '' ?></div>
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
             <input type="password" name="password" class="form-control" value="<?= $password ?? '' ?>">
-            <div class="text-danger"><?= $errors["password"] ?? "" ?></div>
+            <div class="text-danger"><?= $password_error ?? '' ?></div>
         </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
-        <div class="text-danger"><?= $errors["main"] ?? "" ?></div>
+
     </form>
-
-
-
-    <a href="<?php echo $routes->get('homepage')->getPath(); ?>">Back to homepage</a>
 <section>
 <?php include 'Footer.php'; ?>
