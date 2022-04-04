@@ -60,9 +60,9 @@ $routes->add('profile', new Route(
     array('GET')
 ));
 
-$routes->add('edit_profile', new Route(
-    constant('URL_SUBFOLDER') . '/edit/user/{id}/{status}',
-    array('controller' => 'PageController', 'method'=>'editProfile', 'status'=>''),
+$routes->add('update_username', new Route(
+    constant('URL_SUBFOLDER') . '/user/{id}/update/username/{status}',
+    array('controller' => 'PageController', 'method'=>'update_username', 'status'=>''),
     array('id' => '[0-9]+')
 ));
 
@@ -76,8 +76,14 @@ $routes->add('handle_username_update', new Route(
     array('POST')
 ));
 
+$routes->add('update_pfp', new Route(
+    constant('URL_SUBFOLDER') . '/user/{id}/update/pfp/{status}',
+    array('controller' => 'PageController', 'method'=>'update_pfp', 'status'=>''),
+    array('id' => '[0-9]+')
+));
+
 $routes->add('handle_pfp_update', new Route(
-    constant('URL_SUBFOLDER') . '/api/update/user/{id}/pfp',
+    constant('URL_SUBFOLDER') . '/api/user/{id}/update/pfp',
     array('controller' => 'UserController', 'method'=>'update_pfp'),
     array('id' => '[0-9]+'),
     array(),

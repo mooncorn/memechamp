@@ -49,14 +49,18 @@ class PageController
     }
 
     /**
-     * @Route("/edit/user/{id}/{status}", name="edit_profile", method="GET")
+     * @Route("/user/{id}/update/username/{status}", name="update_username", method="GET")
      */
-    public function editProfile(int $id, string $status)
+    public function update_username(int $id, string $status)
     {
-        echo "<pre>";
-        print_r($_SESSION);
-        echo "</pre>";
+        require_once APP_ROOT . '/views/UpdateUsername.php';
+    }
 
-        require_once APP_ROOT . '/views/EditProfile.php';
+    /**
+     * @Route("/user/{id}/update/pfp/{status}", name="update_pfp", method="GET")
+     */
+    public function update_pfp(int $id, string $status)
+    {
+        require_once APP_ROOT . '/views/UpdatePfp.php';
     }
 }

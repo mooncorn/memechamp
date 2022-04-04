@@ -91,6 +91,11 @@ function renderLiked(User $user)
     <section class="mx-auto">
         <div class="row border rounded shadow p-3 mb-4">
             <div class="col p-0 m-0">
+
+                <?php if (Auth::isOwner($user->getId())) { ?>
+                    <a class="" href="<?= Routing::getCustomUrlTo('update_pfp', ['id' => Auth::get('id')]) ?>">
+                <?php } ?>
+
                 <div class="pfp-wrapper rounded-circle shadow">
                     <?php if ($user->getPfp()) { ?>
                         <img class="pfp" src="<?= '/'.constant('URL_SUBFOLDER').'/public/images/uploads/pfps/'.$user->getPfp() ?>"/>
@@ -98,16 +103,22 @@ function renderLiked(User $user)
                         <img class="pfp" src="<?= '/'.constant('URL_SUBFOLDER').'/public/images/uploads/pfps/defaultpfp.jpg' ?>"/>
                     <?php } ?>
                 </div>
+
+                <?php if (Auth::isOwner($user->getId())) { ?>
+                    </a>
+                <?php } ?>
+
             </div>
             <div class="col py-3">
-                <h2><?= $user->getUsername() ?></h2>
-
+                <h2 class="d-inline"><?= $user->getUsername() ?></h2>
+                <?php if (Auth::isOwner($user->getId())) { ?>
+                    <a class="ms-2" href="<?= Routing::getCustomUrlTo('update_username', ['id' => Auth::get('id')]) ?>">Change</a>
+                <?php } ?>
             </div>
 
+
             <div class="col text-end p-0 py-3">
-                <?php if (Auth::isOwner($user->getId())) { ?>
-                    <a class="btn btn-primary shadow" href="<?= Routing::getCustomUrlTo('edit_profile', ['id' => Auth::get('id')]) ?>">Edit</a>
-                <?php } ?>
+
             </div>
 
         </div>
