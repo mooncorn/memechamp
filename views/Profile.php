@@ -2,7 +2,9 @@
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
+use App\Models\Post;
 use App\Models\User;
+use App\Models\Vote;
 
 include 'Header.php';
 
@@ -28,8 +30,28 @@ function renderComments(User $user)
     foreach ($comments as $comment) {
         if (!$comment->isDeleted()) {
             $content = $comment->getContent();
+            $post = (new Post())->load($comment->getPostId());
+            $likes = $comment->getLikes();
             $urlToPost = Routing::getCustomUrlTo('comments', ['id'=>$comment->getPostId()]);
-            echo "<li class='list-group-item'><a href='$urlToPost'>$content</a></li>";
+            ?>
+
+            <a href='<?= $urlToPost ?>'>
+                <li class='list-group-item mb-2'>
+                    <div class="d-flex">
+                        <div><small>Post: <?= $post->getTitle() ?></small></div>
+                        <div class="ms-auto"><small><?= $comment->getCreatedAt() ?></small></div>
+                    </div>
+
+                    <div class="d-flex">
+                        <div>
+                            <strong><?= $content ?></strong>
+                        </div>
+                        <div class="ms-auto"><?= $likes ?> LIKES</div>
+                    </div>
+                </li>
+            </a>
+
+            <?php
         }
     }
     echo "</ul>";
@@ -46,16 +68,29 @@ function renderPosts(User $user)
 
     echo "<ul class='list-group mt-3'>";
     foreach ($posts as $post) {
-        $title = $post->getTitle();
         $urlToPost = Routing::getCustomUrlTo('comments', ['id'=>$post->getId()]);
-        echo "<li class='list-group-item'><a href='$urlToPost'>$title</a></li>";
+        ?>
+
+        <a href='<?= $urlToPost ?>'>
+            <li class='list-group-item'>
+                <div class="d-flex">
+                    <div><small>Posted By <?= $user->getUsername() ?></small></div>
+                    <div class="ms-auto"><small><?= $post->getCreatedAt() ?></small></div>
+                </div>
+                <div class="d-flex">
+                    <div><strong><?= $post->getTitle() ?></strong></div>
+                    <div class="ms-auto"><?= Vote::getTotalVotesForPost($post->getId()) ?> POGGERS</div>
+                </div>
+            </li>
+        </a>
+
+        <?php
     }
-    echo "</ul>";
 }
 
 function renderVoted(User $user)
 {
-
+    
 }
 
 function renderLiked(User $user)
