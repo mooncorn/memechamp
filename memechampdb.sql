@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 29, 2022 at 05:50 PM
+-- Generation Time: Apr 06, 2022 at 05:18 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -85,7 +85,9 @@ INSERT INTO `comment_like` (`id`, `user_id`, `comment_id`) VALUES
 (18, 4, 3),
 (19, 4, 4),
 (20, 4, 18),
-(21, 1, 17);
+(21, 1, 17),
+(22, 20, 12),
+(23, 20, 19);
 
 -- --------------------------------------------------------
 
@@ -169,7 +171,8 @@ INSERT INTO `user` (`id`, `username`, `email`, `password`, `pfp`, `max_poggers`,
 (17, 'p4', 'p4@p', 'p', '2022-03-16-1647399482-1323223134.jpg', 10, 0, 0, '2022-03-15'),
 (18, 'horde', 'horde@horde', 'horde', '2022-03-17-1647529609-853729986.jpg', 10, 0, 0, '2022-03-17'),
 (19, 'changedtest', 'john@gmail.com', 'john', '', 10, 0, 0, '2022-03-19'),
-(20, 'test', 'test3333@test.com', 'test', '', 10, 0, 0, '2022-03-28');
+(20, 'test', 'test3333@test.com', 'test', '2022-04-04-1649101357-1624848726.jpg', 10, 0, 0, '2022-03-28'),
+(21, 'dave', 'dave@dave.com', 'test', '', 10, 0, 0, '2022-03-29');
 
 -- --------------------------------------------------------
 
@@ -257,7 +260,7 @@ ALTER TABLE `comment`
 -- AUTO_INCREMENT for table `comment_like`
 --
 ALTER TABLE `comment_like`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `competition`
@@ -275,7 +278,7 @@ ALTER TABLE `post`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Constraints for dumped tables

@@ -52,7 +52,7 @@ $routes->add('signout', new Route(
 
 $routes->add('profile', new Route(
     constant('URL_SUBFOLDER') . '/user/{userId}/{tab}',
-    array('controller' => 'UserController', 'method'=>'profile', 'tab'=>'posts'),
+    array('controller' => 'PageController', 'method'=>'profile', 'tab'=>'posts'),
     array('id' => '[0-9]+'),
     array(),
     '',
@@ -60,10 +60,36 @@ $routes->add('profile', new Route(
     array('GET')
 ));
 
-$routes->add('edit_profile', new Route(
-    constant('URL_SUBFOLDER') . '/edit/user/{id}',
-    array('controller' => 'UserController', 'method'=>'edit_profile'),
+$routes->add('update_username', new Route(
+    constant('URL_SUBFOLDER') . '/user/{id}/update/username/{status}',
+    array('controller' => 'PageController', 'method'=>'update_username', 'status'=>''),
     array('id' => '[0-9]+')
+));
+
+$routes->add('handle_username_update', new Route(
+    constant('URL_SUBFOLDER') . '/api/update/user/{id}/username',
+    array('controller' => 'UserController', 'method'=>'update_username'),
+    array('id' => '[0-9]+'),
+    array(),
+    '',
+    array(),
+    array('POST')
+));
+
+$routes->add('update_pfp', new Route(
+    constant('URL_SUBFOLDER') . '/user/{id}/update/pfp/{status}',
+    array('controller' => 'PageController', 'method'=>'update_pfp', 'status'=>''),
+    array('id' => '[0-9]+')
+));
+
+$routes->add('handle_pfp_update', new Route(
+    constant('URL_SUBFOLDER') . '/api/user/{id}/update/pfp',
+    array('controller' => 'UserController', 'method'=>'update_pfp'),
+    array('id' => '[0-9]+'),
+    array(),
+    '',
+    array(),
+    array('POST')
 ));
 
 $routes->add('post', new Route(

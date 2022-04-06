@@ -25,17 +25,6 @@ use App\Helpers\Routing;
 </head>
 <body>
 
-<style>
-    .pfp-wrapper {
-        overflow: hidden;
-    }
-    .pfp {
-        height: inherit;
-        width: inherit;
-        object-fit: cover;
-    }
-</style>
-
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="<?= Routing::getUrlTo('homepage') ?>">
