@@ -32,7 +32,7 @@ function renderComments(User $user)
             $content = $comment->getContent();
             $post = (new Post())->load($comment->getPostId());
             $likes = $comment->getLikes();
-            $urlToPost = Routing::getCustomUrlTo('comments', ['id'=>$comment->getPostId()]);
+            $urlToPost = Routing::getCustomUrlTo('post', ['id'=>$comment->getPostId()]);
             ?>
 
             <a href='<?= $urlToPost ?>'>
@@ -68,7 +68,7 @@ function renderPosts(User $user)
 
     echo "<ul class='list-group mt-3'>";
     foreach ($posts as $post) {
-        $urlToPost = Routing::getCustomUrlTo('comments', ['id'=>$post->getId()]);
+        $urlToPost = Routing::getCustomUrlTo('post', ['id'=>$post->getId()]);
         ?>
 
         <a href='<?= $urlToPost ?>'>
@@ -110,6 +110,7 @@ function renderLiked(User $user)
             width: inherit;
             object-fit: cover;
         }
+
         section {
             padding: 20px;
             max-width: 600px;

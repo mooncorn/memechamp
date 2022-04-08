@@ -8,17 +8,6 @@ include 'Header.php';
  */
 
 ?>
-
-<style>
-    section {
-        max-width: 600px;
-        padding: 20px;
-    }
-    input, label, small {
-        display: block;
-    }
-</style>
-
 <section class="mx-auto">
     <div class="card">
         <div class="card-header">

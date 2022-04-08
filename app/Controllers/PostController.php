@@ -14,8 +14,7 @@ class PostController
          {
              $user = new User();
              $user->load(GetUserBy::ID, $post->getUserId());
-             echo "<pre>";print_r($post);echo "</pre>";
-             require_once APP_ROOT . '/views/Post.php';
+             require_once APP_ROOT . '/views/PostComments.php';
          }
          else
          {

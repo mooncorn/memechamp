@@ -18,18 +18,7 @@ if ($status == 'rejected') {
 }
 
 ?>
-
-    <style>
-        section {
-            max-width: 600px;
-            padding: 20px;
-        }
-        input, label, small {
-            display: block;
-        }
-    </style>
-
-    <section class="mx-auto">
+<section class="mx-auto">
     <h1 class="text-center">Sign In</h1>
 
     <?php if (isset($global_err) && $global_err) { ?>
@@ -53,5 +42,5 @@ if ($status == 'rejected') {
     </form>
 
     <a href="<?php echo Routing::getUrlTo('homepage') ?>">Back to homepage</a>
-    <section>
+<section>
 <?php include 'Footer.php'; ?>

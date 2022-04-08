@@ -5,19 +5,20 @@ use App\Helpers\Routing;
 use App\Models\Comment;
 use App\Models\Enums\ReplyTarget;
 use App\Models\Like;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Vote;
 
 include 'Header.php';
 
 /**
- * @var int $postId
- * @var User|null $user
+ * @var Post $post
+ * @var User $user
  */
 
 
-function show_comments(int $postId) {
-    $comments = Comment::getReplies($postId, ReplyTarget::POST);
+function show_comments(Post $post) {
+    $comments = Comment::getReplies($post->getId(), ReplyTarget::POST);
 
     show_replies($comments);
 }
@@ -99,30 +100,21 @@ function show_comment($comment, $level = 0) {
 
     <?php } ?>
 
-<style>
-    section {
-        max-width: 600px;
-        padding: 20px;
-    }
-</style>
-
 <section class="mx-auto">
 
-    <p>
-        [POST <?= $postId ?>]
-        Number of poggers: <?= Vote::getTotalVotesForPost($postId) ?>
-    </p>
+    <?php require_once 'Post.php'; ?>
 
-    <hr>
+    <hr class="mt-1">
 
     <div class="d-flex align-items-center">
-        <a href="<?= Routing::getCustomUrlTo('reply_to_post', ['id'=>$postId]) ?>">Create a comment</a>
-
         <?php if (Auth::isAuthenticated()) {
-            $amountOfVotes = Vote::getVoteAmount($postId, Auth::get('id'));
-            $formAction = "/" . constant('URL_SUBFOLDER') . "/vote/post/" . $postId . "/user/" . Auth::get('id');
-            $remainingPoggers = $user->getRemainingPoggers();
+            $currentUser = User::fetch(Auth::get('id'));
+            $amountOfVotes = Vote::getVoteAmount($post->getId(), Auth::get('id'));
+            $formAction = "/" . constant('URL_SUBFOLDER') . "/vote/post/" . $post->getId() . "/user/" . Auth::get('id');
+            $remainingPoggers = $currentUser->getRemainingPoggers();
+
             ?>
+            <a href="<?= Routing::getCustomUrlTo('reply_to_post', ['id'=>$post->getId()]) ?>">Create a comment</a>
         <form method="post" action="<?= $formAction ?>" class="d-flex align-items-center ms-auto">
             <input style="width: 80px" class="form-control border-none" value="<?= $amountOfVotes ?>" type="number" name="amount" min="1" max="<?= $remainingPoggers + $amountOfVotes ?>" required/>
             <button class="btn btn-primary ms-2" type="submit">POG</button>
@@ -130,16 +122,9 @@ function show_comment($comment, $level = 0) {
         <?php } ?>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h1>Comments</h1>
-            <p><?= Comment::getCount($postId, ReplyTarget::POST) ?> Comments</p>
-        </div>
-
-        <ul class="list-group list-group-flush">
-            <?php show_comments($postId); ?>
-        </ul>
-    </div>
+    <ul class="list-group list-group-flush">
+        <?php show_comments($post); ?>
+    </ul>
 </section>
 
 <?php include 'Footer.php'; ?>
