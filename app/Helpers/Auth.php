@@ -8,18 +8,18 @@ class Auth
     public static function isAuthenticated(): bool {
         global $_SESSION;
 
-        return isset($_SESSION['id']);
+        return isset($_SESSION['auth']['id']);
     }
 
     public static function isOwner($id): bool {
         global $_SESSION;
 
-        return isset($_SESSION['id']) && $_SESSION['id'] == $id;
+        return isset($_SESSION['auth']['id']) && $_SESSION['auth']['id'] == $id;
     }
 
     public static function setSession(array $data) {
         foreach ($data as $key=>$value) {
-            $_SESSION[$key] = $value;
+            $_SESSION['auth'][$key] = $value;
         }
     }
 
@@ -29,8 +29,8 @@ class Auth
 
     public static function get($key): mixed {
         if (Auth::isAuthenticated()) {
-            if (isset($_SESSION[$key])) {
-                return $_SESSION[$key];
+            if (isset($_SESSION['auth'][$key])) {
+                return $_SESSION['auth'][$key];
             }
             return null;
         }

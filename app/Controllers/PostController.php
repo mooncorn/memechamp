@@ -9,7 +9,6 @@ use App\Models\User;
 class PostController
 {
     public function show(int $id) {
-
          $post = new Post();
          if ($post->load($id))
          {

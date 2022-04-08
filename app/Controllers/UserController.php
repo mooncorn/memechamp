@@ -4,226 +4,141 @@ namespace App\Controllers;
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
-use App\Models\Comment;
-use App\Models\Enums\GetUserBy;
 use App\Models\User;
+use App\Services\UserService;
+use Exception;
 
 class UserController
 {
-	public function profile(int $id, string $tab)
+    /**
+     * @Route("/api/signup", name="handle_signup", method="POST")
+     */
+    public function signup()
     {
-        $user = User::fetch($id);
+        $username = filter_input(INPUT_POST, 'username');
+        $email = filter_input(INPUT_POST, 'email');
+        $password = filter_input(INPUT_POST, 'password');
 
-        if ($user)
+        if (UserService::signup($username, $email, $password))
         {
-            if ($tab == "comments")
-            {
-                $comments = $user->getComments();
-            }
-
-            require_once APP_ROOT . '/views/Profile.php';
+            Routing::redirectToPage('homepage');
         }
         else
         {
-            require_once APP_ROOT . '/views/404.php';
+            Routing::redirectToCustomPage('signup', ['status'=>'rejected']);
         }
-	}
-
-    public function signup()
-    {
-        $errors = array();
-
-        if (!empty($_POST))
-        {
-            $username = filter_input(INPUT_POST, 'username');
-            $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-            $password = filter_input(INPUT_POST, 'password');
-
-            // check required fields
-            if (!$username)
-            {
-                $errors["username"] = "Username is required";
-            }
-            if (!$email)
-            {
-                $errors["email"] = "Email is invalid";
-            }
-            if (!$password)
-            {
-                $errors["password"] = "Password is required";
-            }
-
-            // check unique fields
-            if (!isset($errors['email']))
-            {
-                if (User::exists(GetUserBy::EMAIL, $email))
-                {
-                    $errors['email'] = 'Email is taken';
-                }
-            }
-            if (!isset($errors['username']))
-            {
-                if (User::exists(GetUserBy::USERNAME, $username))
-                {
-                    $errors['username'] = "Username is taken";
-                }
-            }
-
-            if (empty($errors))
-            {
-                $user = User::build($username, $email, $password)->save();
-
-                // add user info to the current session
-                Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
-
-                // redirect to homepage
-                Routing::redirectToPage('homepage');
-            }
-        }
-
-        require_once APP_ROOT . '/views/Signup.php';
     }
 
+    /**
+     * @Route("/api/signin", name="handle_signin", method="POST")
+     */
     public function signin()
     {
-        $errors = array();
+        $username = filter_input(INPUT_POST, 'username');
+        $password = filter_input(INPUT_POST, 'password');
 
-        if (!empty($_POST))
+        if (UserService::signin($username, $password))
         {
-            $username = filter_input(INPUT_POST, 'username');
-            $password = filter_input(INPUT_POST, 'password');
-
-            // check required fields
-            if (!$username)
-            {
-                $errors["username"] = "Username is required";
-            }
-            if (!$password)
-            {
-                $errors["password"] = "Password is required";
-            }
-
-            if (empty($errors))
-            {
-                $user = new User();
-
-                // if user with provided username was found
-                if ($user->load(GetUserBy::USERNAME, $username))
-                {
-                    // verify if the passwords match
-                    if ($user->getPassword() == $password)
-                    {
-                        // add user info to the current session
-                        Auth::setSession(['username' => $user->getUsername(), 'id' => $user->getId()]);
-
-                        // redirect to homepage
-                        Routing::redirectToPage('homepage');
-                    }
-                    else
-                    {
-                        $errors["main"] = "Invalid credentials";
-                    }
-                }
-                else
-                {
-                    $errors["main"] = "Invalid credentials";
-                }
-            }
+            Routing::redirectToPage('homepage');
         }
-
-        require_once APP_ROOT . '/views/Signin.php';
+        else
+        {
+            Routing::redirectToCustomPage('signin', ['status'=>'rejected']);
+        }
     }
 
+    /**
+     * @Route("/api/signout", name="handle_signout", method="GET")
+     */
     public function signout()
     {
         Auth::clearSession();
-
         Routing::redirectToPage('homepage');
     }
 
-    public function edit_profile(int $id)
+    /**
+     * @Route("/api/update/user/{id}/username", name="handle_username_update", method="POST")
+     */
+    public function update_username(int $id)
     {
-        $errors = array();
-        $messages = array();
+        $_SESSION['form_update_username'] = '';
 
-        // handle username update only if current user has permission
+        $username = filter_input(INPUT_POST, 'username');
+
         if (Auth::isOwner($id))
         {
-            $user = User::fetch($id);
-
-            // handle username update
-            if (isset($_POST['username']))
+            try
             {
-                $username = filter_input(INPUT_POST, 'username');
+                $user = User::fetch($id);
+                $user->setUsername($username);
+                $user->save();
 
-                // check if username passed filter
-                if ($username)
-                {
-                    // check if username is unique
-                    if (!User::exists(GetUserBy::USERNAME, $username))
-                    {
-                        $user->setUsername($username);
-                        $user->save();
+                Auth::setSession(['username' => $username]);
+                $_SESSION['form_update_username'] = 'Username updated successfully';
 
-                        Auth::setSession(['username' => $username]);
-
-                        $messages['username'] = 'Username updated successfully';
-                    }
-                    else
-                    {
-                        $errors['username'] = 'Username is taken';
-                    }
-                }
-                else
-                {
-                    $errors['username'] = 'Username is required';
-                }
+                Routing::redirectToCustomPage('update_username', ['id'=>$id, 'status'=>'fulfilled']);
             }
-
-            // TODO: refactor this eventually
-            // handle pfp update
-            if (!empty($_FILES))
+            catch (Exception $e)
             {
-                if (!empty($_FILES['pfp']['name']))
-                {
-                    $targetDir = APP_ROOT . '/public/images/uploads/pfps';
-                    $fileName = basename($_FILES['pfp']['name']);
-                    $fileType = pathinfo($fileName,PATHINFO_EXTENSION);
-                    $date = date('Y-m-d');
-                    $time = time();
-                    $rand = rand();
-                    $newFileName = $date . '-' . $time . '-' . $rand . '.' . $fileType;
-                    $targetFilePath = $targetDir . '/' . $newFileName;
+                $_SESSION['form_update_username'] = $e->getMessage();
 
-                    // Allow certain file formats
-                    $allowTypes = array('jpg','png','jpeg');
-                    if(in_array($fileType, $allowTypes))
-                    {
-                        // Upload file to server
-                        if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath))
-                        {
-                            // Insert image file name into database
-                            $user->setPfp($newFileName);
-                            $user->save();
-                            $messages['pfp'] = 'Profile picture updated successfully';
-                        }
-                    }
-                    else
-                    {
-                        $errors['pfp'] = 'Only JPG, JPEG & PNG files are allowed';
-                    }
-                }
-                else
-                {
-                    $errors['pfp'] = 'Image is required';
-                }
+                Routing::redirectToCustomPage('update_username', ['id'=>$id, 'status'=>'rejected']);
             }
-
-            require_once APP_ROOT . '/views/EditProfile.php';
         }
         else
         {
             require_once APP_ROOT . '/views/Unauthorized.php';
         }
+    }
+
+    /**
+     * @Route("/api/user/{id}/update/pfp", name="handle_pfp_update", method="POST")
+     */
+    public function update_pfp(int $id)
+    {
+        $_SESSION['form_update_pfp'] = '';
+
+        if (!empty($_FILES))
+        {
+            if (!empty($_FILES['pfp']['name']))
+            {
+                $targetDir = APP_ROOT . '/public/images/uploads/pfps';
+                $fileName = basename($_FILES['pfp']['name']);
+                $fileType = pathinfo($fileName,PATHINFO_EXTENSION);
+                $date = date('Y-m-d');
+                $time = time();
+                $rand = rand();
+                $newFileName = $date . '-' . $time . '-' . $rand . '.' . $fileType;
+                $targetFilePath = $targetDir . '/' . $newFileName;
+
+                // Allow certain file formats
+                $allowTypes = array('jpg','png','jpeg');
+                if(in_array($fileType, $allowTypes))
+                {
+                    // Upload file to server
+                    if(move_uploaded_file($_FILES["pfp"]["tmp_name"], $targetFilePath))
+                    {
+                        // Insert image file name into database
+                        $user = User::fetch($id);
+                        $user->setPfp($newFileName);
+                        $user->save();
+                        $_SESSION['form_update_pfp'] = 'Profile picture updated successfully';
+
+                        Routing::redirectToCustomPage('update_pfp', ['id'=>$id, 'status'=>'fulfilled']);
+                        return;
+                    }
+                }
+                else
+                {
+                    $_SESSION['form_update_pfp'] = 'Only JPG, JPEG & PNG files are allowed';
+                }
+            }
+            else
+            {
+                $_SESSION['form_update_pfp'] = 'Image is required';
+            }
+        }
+
+        Routing::redirectToCustomPage('update_pfp', ['id'=>$id, 'status'=>'rejected']);
     }
 }

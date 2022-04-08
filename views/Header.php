@@ -7,7 +7,6 @@ use App\Helpers\Routing;
  * @var Routing
  * @var Auth
  */
-
 ?>
 
 <html lang="en">
@@ -25,17 +24,6 @@ use App\Helpers\Routing;
     <script src="https://kit.fontawesome.com/e74decf3a7.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-<style>
-    .pfp-wrapper {
-        overflow: hidden;
-    }
-    .pfp {
-        height: inherit;
-        width: inherit;
-        object-fit: cover;
-    }
-</style>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
@@ -62,20 +50,20 @@ use App\Helpers\Routing;
                 </li>
             </ul>
 
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-center">
                 <?php if (Auth::isAuthenticated()) { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['id' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['userId' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Routing::getUrlTo('signout') ?>">Sign Out</a>
                     </li>
                 <?php } else { ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Routing::getUrlTo('signup') ?>">Sign Up</a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('signup', ['status'=>'']) ?>">Sign Up</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Routing::getUrlTo('signin') ?>">Sign In</a>
+                        <a class="nav-link" href="<?= Routing::getCustomUrlTo('signin', ['status'=>'']) ?>">Sign In</a>
                     </li>
                 <?php } ?>
             </ul>

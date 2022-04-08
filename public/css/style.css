@@ -2,6 +2,7 @@
 a {
     text-decoration: none;
 }
+
 body {
     font-family: 'Roboto', sans-serif;
     background-color: #eee;
@@ -38,4 +39,11 @@ body {
     line-height: 2;
 }
 
+section {
+    max-width: 600px;
+    padding: 20px;
+}
 
+input, label, small {
+    display: block;
+}
