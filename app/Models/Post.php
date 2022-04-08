@@ -25,7 +25,7 @@ class Post {
     public function load(int $id): ?Post
     {
         $pdo = DBConnection::getDB();
-        $row = $pdo->query("SELECT * FROM post WHERE user_id=$id")->fetch();
+        $row = $pdo->query("SELECT * FROM post WHERE id=$id")->fetch();
         if ($row) {
             $this->id = $row['id'];
             $this->user_id = $row['user_id'];
@@ -59,6 +59,12 @@ class Post {
         {
             return null;
         }
+    }
+
+    public static function fetchAllInCurrentComp() {
+        $pdo = DBConnection::getDB();
+        $result = $pdo->query("SELECT post.id as post_id, user_id, title, img FROM post, competition WHERE comp_id=competition.id AND is_active=true")->fetchAll();
+        return $result;
     }
 
     /**

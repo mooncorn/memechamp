@@ -28,7 +28,7 @@ class CommentController
                 $comment->save();
 
                 $postId = $comment->getPostId();
-                Routing::redirectToCustomPage('comments', ['id' => $postId]);
+                Routing::redirectToCustomPage('post', ['id' => $postId]);
             }
             else
             {
@@ -47,7 +47,7 @@ class CommentController
         if (Auth::isAuthenticated()) {
             $user = User::fetch(Auth::get('id'));
         }
-        require_once APP_ROOT . '/views/Comments.php';
+        require_once APP_ROOT . '/views/PostComments.php';
     }
 
     public function replyToComment(int $id)
@@ -71,7 +71,7 @@ class CommentController
                 $comment = Comment::build($content, $comment->getPostId(), Auth::get('id'), $id);
                 $comment->save();
 
-                Routing::redirectToCustomPage('comments', ['id'=>$comment->getPostId()]);
+                Routing::redirectToCustomPage('post', ['id'=>$comment->getPostId()]);
             }
             else
             {
@@ -99,7 +99,7 @@ class CommentController
             if ($content)
             {
                 Comment::build($content, $id, Auth::get('id'))->save();
-                Routing::redirectToCustomPage('comments', ['id'=>$id]);
+                Routing::redirectToCustomPage('post', ['id'=>$id]);
             }
             else
             {
@@ -139,7 +139,7 @@ class CommentController
                 $comment->setContent($content);
                 $comment->save();
 
-                Routing::redirectToCustomPage('comments', ['id'=>$comment->getPostId()]);
+                Routing::redirectToCustomPage('post', ['id'=>$comment->getPostId()]);
             }
             else
             {
@@ -168,6 +168,6 @@ class CommentController
         }
 
         $comment = Comment::fetch($id);
-        Routing::redirectToCustomPage('comments', ['id'=>$comment->getPostId()]);
+        Routing::redirectToCustomPage('post', ['id'=>$comment->getPostId()]);
     }
 }

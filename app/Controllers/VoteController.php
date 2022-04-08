@@ -35,6 +35,6 @@ class VoteController
             }
         }
 
-        Routing::redirectToCustomPage('comments', ['id' => $postId]);
+        Routing::redirectToCustomPage('post', ['id' => $postId]);
     }
 }

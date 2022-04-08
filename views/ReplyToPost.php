@@ -22,13 +22,12 @@ include 'Header.php';
 
 <section class="mx-auto">
 
-    <h1><a href="<?= Routing::getCustomUrlTo('comments', ['id'=>$id]) ?>">Post <?=$id?></a></h1>
+    <h1><a href="<?= Routing::getCustomUrlTo('post', ['id'=>$id]) ?>">Post <?=$id?></a></h1>
 
     <div class="card">
         <div class="card-header">
             <h2>Create comment</h2>
         </div>
-
 
         <div class="card-body">
             <form method="post">

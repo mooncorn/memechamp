@@ -96,12 +96,6 @@ $routes->add('post', new Route(
     constant('URL_SUBFOLDER') . '/post/{id}',
     array('controller' => 'PostController', 'method'=>'show')
 ));
-	
-$routes->add('comments', new Route(
-    constant('URL_SUBFOLDER') . '/post/{id}/comments',
-    array('controller' => 'CommentController', 'method'=>'comments'),
-    array('id' => '[0-9]+')
-));
 
 $routes->add('delete_comment', new Route(
     constant('URL_SUBFOLDER') . '/comment/{id}/delete',

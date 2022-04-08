@@ -25,16 +25,6 @@ if ($status == 'rejected') {
 
 ?>
 
-<style>
-    section {
-        max-width: 600px;
-        padding: 20px;
-    }
-    input, label, small {
-        display: block;
-    }
-</style>
-
 <section class="mx-auto">
     <h1 class="text-center">Sign Up</h1>
 
