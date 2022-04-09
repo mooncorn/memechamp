@@ -47,11 +47,8 @@ class UserService
         if (empty($_SESSION['form_signup']['errors']))
         {
             $user->save();
-
             $user->load(GetUserBy::USERNAME, $username);
-
-            $_SESSION['username'] = $user->getUsername();
-            $_SESSION['id'] = $user->getId();
+            Auth::setSession(['username'=>$user->getUsername(), 'id'=>$user->getId()]);
 
             return true;
         }

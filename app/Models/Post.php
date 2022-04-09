@@ -61,10 +61,10 @@ class Post {
         }
     }
 
-    public static function fetchAllInCurrentComp() {
+    public static function fetchAllInCurrentComp(): bool|array
+    {
         $pdo = DBConnection::getDB();
-        $result = $pdo->query("SELECT post.id as post_id, user_id, title, img FROM post, competition WHERE comp_id=competition.id AND is_active=true")->fetchAll();
-        return $result;
+        return $pdo->query("SELECT post.id as post_id, user_id, title, img FROM post, competition WHERE comp_id=competition.id AND is_active=true ORDER BY post.id DESC")->fetchAll();
     }
 
     /**
