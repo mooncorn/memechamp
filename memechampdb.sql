@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2022 at 05:18 PM
+-- Generation Time: Apr 11, 2022 at 03:41 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -58,7 +58,13 @@ INSERT INTO `comment` (`id`, `content`, `owner_id`, `reply_to_id`, `post_id`, `d
 (17, 'elden ring just came out', 4, 16, 1, 0, 1, '2022-03-22'),
 (18, 'elden ring is dope', 4, 17, 1, 0, 0, '2022-03-22'),
 (19, 'more like 10 days', 4, 16, 1, 1, 1, '2022-03-22'),
-(20, 'this meme sucks ', 1, NULL, 1, 0, 0, '2022-03-29');
+(20, 'this meme sucks ', 1, NULL, 1, 0, 0, '2022-03-29'),
+(21, 'tess1', 20, NULL, 1, 1, 1, '2022-04-08'),
+(22, 'hahah32', 1, NULL, 4, 1, 1, '2022-04-08'),
+(23, 'true dood', 1, 22, 4, 0, 0, '2022-04-08'),
+(24, 'delete this now', 26, 10, 1, 0, 0, '2022-04-08'),
+(26, 'dont say that', 26, 2, 1, 0, 0, '2022-04-08'),
+(27, 'read again maybe you\'ll get the joke', 26, 8, 1, 0, 0, '2022-04-08');
 
 -- --------------------------------------------------------
 
@@ -87,7 +93,11 @@ INSERT INTO `comment_like` (`id`, `user_id`, `comment_id`) VALUES
 (20, 4, 18),
 (21, 1, 17),
 (22, 20, 12),
-(23, 20, 19);
+(23, 20, 19),
+(24, 20, 17),
+(25, 1, 22),
+(26, 26, 10),
+(27, 26, 27);
 
 -- --------------------------------------------------------
 
@@ -106,7 +116,7 @@ CREATE TABLE `competition` (
 --
 
 INSERT INTO `competition` (`id`, `is_active`, `created_at`) VALUES
-(1, 1, '2022-03-19');
+(4, 1, '2022-03-19');
 
 -- --------------------------------------------------------
 
@@ -128,7 +138,8 @@ CREATE TABLE `post` (
 --
 
 INSERT INTO `post` (`id`, `user_id`, `comp_id`, `title`, `img`, `created_at`) VALUES
-(1, 1, 1, 'welcome to memechamps', 'testimg.jpg', '2022-03-19');
+(1, 1, 4, 'welcome to memechamps', 'meme1.jpg', '2022-03-19'),
+(4, 20, 4, 'am i right guys', 'meme2.jpg', '2022-04-08');
 
 -- --------------------------------------------------------
 
@@ -172,7 +183,9 @@ INSERT INTO `user` (`id`, `username`, `email`, `password`, `pfp`, `max_poggers`,
 (18, 'horde', 'horde@horde', 'horde', '2022-03-17-1647529609-853729986.jpg', 10, 0, 0, '2022-03-17'),
 (19, 'changedtest', 'john@gmail.com', 'john', '', 10, 0, 0, '2022-03-19'),
 (20, 'test', 'test3333@test.com', 'test', '2022-04-04-1649101357-1624848726.jpg', 10, 0, 0, '2022-03-28'),
-(21, 'dave', 'dave@dave.com', 'test', '', 10, 0, 0, '2022-03-29');
+(21, 'dave', 'dave@dave.com', 'test', '', 10, 0, 0, '2022-03-29'),
+(25, 'birb', 'birb@kip.com', 'test', '', 10, 0, 0, '2022-04-08'),
+(26, 'honk', 'honk@gmail.com', 'test', '', 10, 0, 0, '2022-04-08');
 
 -- --------------------------------------------------------
 
@@ -193,7 +206,8 @@ CREATE TABLE `vote` (
 
 INSERT INTO `vote` (`post_id`, `user_id`, `amount`, `created_at`) VALUES
 (1, 1, 9, 2147483647),
-(1, 20, 5, 2147483647);
+(1, 20, 10, 2147483647),
+(4, 1, 1, 2147483647);
 
 --
 -- Indexes for dumped tables
@@ -254,31 +268,31 @@ ALTER TABLE `vote`
 -- AUTO_INCREMENT for table `comment`
 --
 ALTER TABLE `comment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `comment_like`
 --
 ALTER TABLE `comment_like`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `competition`
 --
 ALTER TABLE `competition`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `post`
 --
 ALTER TABLE `post`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Constraints for dumped tables
