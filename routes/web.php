@@ -138,6 +138,11 @@ $routes->add('handle_vote', new Route(
     array('postId' => '[0-9]+', 'userId' => '[0-9]+')
 ));
 
+$routes->add('dashboard', new Route(
+    constant('URL_SUBFOLDER') . '/dashboard',
+    array('controller' => 'PageController', 'method'=>'dashboard')
+));
+
 // ================== (End) Routes ==================
 
 // global url generator

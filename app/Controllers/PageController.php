@@ -63,4 +63,8 @@ class PageController
     {
         require_once APP_ROOT . '/views/UpdatePfp.php';
     }
+
+    public function dashboard() {
+        require_once APP_ROOT . '/views/Dashboard.php';
+    }
 }
