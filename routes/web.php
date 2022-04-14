@@ -92,6 +92,11 @@ $routes->add('handle_pfp_update', new Route(
     array('POST')
 ));
 
+$routes->add('create_post', new Route(
+    constant('URL_SUBFOLDER') . '/post/create',
+    array('controller' => 'PostController', 'method'=>'createPost')
+));
+
 $routes->add('post', new Route(
     constant('URL_SUBFOLDER') . '/post/{id}',
     array('controller' => 'PostController', 'method'=>'show')

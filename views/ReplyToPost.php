@@ -21,9 +21,6 @@ include 'Header.php';
 </style>
 
 <section class="mx-auto">
-
-    <h1><a href="<?= Routing::getCustomUrlTo('post', ['id'=>$id]) ?>">Post <?=$id?></a></h1>
-
     <div class="card">
         <div class="card-header">
             <h2>Create comment</h2>

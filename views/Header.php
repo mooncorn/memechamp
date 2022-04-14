@@ -2,11 +2,17 @@
 
 use App\Helpers\Auth;
 use App\Helpers\Routing;
+use App\Models\User;
 
 /**
  * @var Routing
  * @var Auth
  */
+
+if (Auth::isAuthenticated()) {
+    $user = User::fetch(Auth::get('id'));
+}
+
 ?>
 
 <html lang="en">
@@ -48,10 +54,20 @@ use App\Helpers\Routing;
                 <li class="nav-item">
                     <a class="nav-link active" href="<?= Routing::getUrlTo('homepage') ?>">Feed</a>
                 </li>
+
+                <?php if (Auth::isAuthenticated()) { ?>
+                <li class="nav-item">
+                    <a class="nav-link active" href="<?= Routing::getUrlTo('create_post') ?>">Create Post</a>
+                </li>
+                <?php } ?>
+
             </ul>
 
             <ul class="navbar-nav ms-auto align-items-center">
                 <?php if (Auth::isAuthenticated()) { ?>
+                    <li class="nav-item d-flex">
+                        <a class="nav-link"><?= $user->getRemainingPoggers() ?>/<?= $user->getMaxPoggers() ?> POGGERS</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Routing::getCustomUrlTo('profile', ['userId' => Auth::get('id')]) ?>"><?= Auth::get('username') ?></a>
                     </li>
