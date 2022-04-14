@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\DBConnection;
+use Exception;
 
 class Post {
     protected int $id;
@@ -39,32 +40,45 @@ class Post {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function save(): ?Post
     {
         $pdo = DBConnection::getDB();
-        try {
-            if ($this->id != 0)
-            {
-                $stmt = $pdo->prepare("UPDATE post SET title=?, img=? WHERE id=?");
-                $stmt->execute([$this->title, $this->img, $this->id]);
-            }
-            else
-            {
-                $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$this->user_id, $this->comp_id, $this->title, $this->img]);
-            }
-            return $this;
-        }
-        catch (Exception $e)
+        if ($this->id != 0)
         {
-            return null;
+            $stmt = $pdo->prepare("UPDATE post SET title=?, img=? WHERE id=?");
+            $stmt->execute([$this->title, $this->img, $this->id]);
         }
+        else
+        {
+            $competition = Competition::fetchActive();
+            if (isset($competition['id'])) {
+                $compId = $competition['id'];
+                $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img) VALUES (?, ?, ?, ?)");
+                $stmt->execute([$this->user_id, $compId, $this->title, $this->img]);
+            } else {
+                throw new Exception("Cannot create new post due to no active competitions");
+            }
+
+        }
+        return $this;
     }
 
     public static function fetchAllInCurrentComp(): bool|array
     {
         $pdo = DBConnection::getDB();
         return $pdo->query("SELECT post.id as post_id, user_id, title, img FROM post, competition WHERE comp_id=competition.id AND is_active=true ORDER BY post.id DESC")->fetchAll();
+    }
+
+    public static function build(int $ownerId, string $title, string $image): Post
+    {
+        $post = new Post();
+        $post->setUserId($ownerId);
+        $post->setTitle($title);
+        $post->setImg($image);
+        return $post;
     }
 
     /**

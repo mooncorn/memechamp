@@ -48,6 +48,13 @@ use App\Helpers\Routing;
                 <li class="nav-item">
                     <a class="nav-link active" href="<?= Routing::getUrlTo('homepage') ?>">Feed</a>
                 </li>
+
+                <?php if (Auth::isAuthenticated()) { ?>
+                <li class="nav-item">
+                    <a class="nav-link active" href="<?= Routing::getUrlTo('create_post') ?>">Create Post</a>
+                </li>
+                <?php } ?>
+
             </ul>
 
             <ul class="navbar-nav ms-auto align-items-center">
