@@ -120,8 +120,7 @@ class User {
         $pdo = DBConnection::getDB();
         $competition = Competition::fetchCurrent();
         $compId = $competition['id'];
-        ///FIX THIS PROBLEm
-        $result = $pdo->query("SELECT SUM(amount) FROM vote, post, competition WHERE vote.user_id=$this->id AND vote.post_id=post.id AND post.comp_id=$compId")->fetch();
+        $result = $pdo->query("SELECT SUM(amount) FROM vote v, post p WHERE v.user_id=$this->id AND v.post_id=p.id AND p.comp_id=$compId")->fetch();
 
         $sumOfVotes = $result["SUM(amount)"] ?? 0;
         return $this->max_poggers - $sumOfVotes;
