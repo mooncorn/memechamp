@@ -65,7 +65,13 @@ if (Auth::isAuthenticated()) {
 
             <ul class="navbar-nav ms-auto align-items-center">
                 <?php if (Auth::isAuthenticated()) { ?>
-                    <li class="nav-item d-flex">
+                    <?php if ($user->isIsAdmin()) { ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= Routing::getUrlTo('dashboard') ?>">Dashboard</a>
+                        </li>
+                    <?php } ?>
+
+                    <li class="nav-item">
                         <a class="nav-link"><?= $user->getRemainingPoggers() ?>/<?= $user->getMaxPoggers() ?> POGGERS</a>
                     </li>
                     <li class="nav-item">

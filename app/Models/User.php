@@ -118,7 +118,10 @@ class User {
     public function getRemainingPoggers(): int
     {
         $pdo = DBConnection::getDB();
-        $result = $pdo->query("SELECT SUM(amount) FROM vote, post, competition WHERE vote.user_id=$this->id AND vote.post_id=post.id AND post.comp_id=competition.id AND competition.is_active=true")->fetch();
+        $competition = Competition::fetchCurrent();
+        $compId = $competition['id'];
+        ///FIX THIS PROBLEm
+        $result = $pdo->query("SELECT SUM(amount) FROM vote, post, competition WHERE vote.user_id=$this->id AND vote.post_id=post.id AND post.comp_id=$compId")->fetch();
 
         $sumOfVotes = $result["SUM(amount)"] ?? 0;
         return $this->max_poggers - $sumOfVotes;

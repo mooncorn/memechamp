@@ -53,7 +53,7 @@ class Post {
         }
         else
         {
-            $competition = Competition::fetchActive();
+            $competition = Competition::fetchCurrent();
             if (isset($competition['id'])) {
                 $compId = $competition['id'];
                 $stmt = $pdo->prepare("INSERT INTO post (user_id, comp_id, title, img) VALUES (?, ?, ?, ?)");
@@ -69,7 +69,25 @@ class Post {
     public static function fetchAllInCurrentComp(): bool|array
     {
         $pdo = DBConnection::getDB();
-        return $pdo->query("SELECT post.id as post_id, user_id, title, img FROM post, competition WHERE comp_id=competition.id AND is_active=true ORDER BY post.id DESC")->fetchAll();
+        $currentComp = Competition::fetchCurrent();
+        $compId = $currentComp['id'];
+        return $pdo->query("SELECT post.id as post_id, user_id, title, img FROM post, competition WHERE comp_id=competition.id AND competition.id=$compId ORDER BY post.id DESC")->fetchAll();
+    }
+
+    public static function fetchPostsWithTotalVotes(): array
+    {
+        $competition = Competition::fetchCurrent();
+        $compId = $competition['id'];
+        $posts = DBConnection::getDB()->query("SELECT * FROM post WHERE comp_id=$compId")->fetchAll();
+
+        $result = [];
+
+        foreach ($posts as $post) {
+            $post['totalVotes'] = Vote::getTotalVotesForPost($post['id']);
+            array_push($result, $post);
+        }
+
+        return $result;
     }
 
     public static function build(int $ownerId, string $title, string $image): Post
