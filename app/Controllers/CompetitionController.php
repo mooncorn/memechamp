@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Helpers\Auth;
+use App\Helpers\Routing;
 use App\Models\Competition;
 use App\Models\Post;
 use App\Models\User;
@@ -47,6 +48,7 @@ class CompetitionController
                 }
 
                 // YOOOLOOOO letss goooo
+                Routing::redirectToPage('dashboard');
 
             } else {
                 require_once APP_ROOT . '/views/Unauthorized.php';
