@@ -6,7 +6,18 @@ use App\Helpers\DBConnection;
 
 class Competition
 {
-    public static function fetchActive() {
-        return DBConnection::getDB()->query("SELECT id FROM competition WHERE is_active=true")->fetch();
+    public static function fetchCurrent() {
+        return DBConnection::getDB()->query("SELECT * FROM competition ORDER BY created_at DESC")->fetch();
+    }
+
+    public static function fetchPrevious() {
+        $stmt = DBConnection::getDB()->query("SELECT * FROM competition ORDER BY created_at DESC");
+        $stmt->fetch();
+        return $stmt->fetch();
+    }
+
+    public static function createNew(): bool
+    {
+        return DBConnection::getDB()->prepare("INSERT INTO competition (is_active) VALUES (true)")->execute();
     }
 }

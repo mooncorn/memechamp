@@ -143,6 +143,16 @@ $routes->add('dashboard', new Route(
     array('controller' => 'PageController', 'method'=>'dashboard')
 ));
 
+$routes->add('handle_competition_ending', new Route(
+    constant('URL_SUBFOLDER') . '/api/end_competition',
+    array('controller' => 'CompetitionController', 'method'=>'endCompetition'),
+    array(),
+    array(),
+    '',
+    array(),
+    array('POST')
+));
+
 // ================== (End) Routes ==================
 
 // global url generator
